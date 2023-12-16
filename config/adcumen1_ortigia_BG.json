@@ -1,0 +1,93 @@
+
+{
+	"help": "comment text goes here...",
+
+
+	"emotion_jumps": {
+		"emotion_ids": [1,2,3,4,5,6,7,8],
+		"clip_length": 5,
+		"jump": 0.5,
+		"background_size": 4000
+	},
+
+	"dataset": {
+			"name": "adcumen",
+		    "data_dir": "/localstore/LocalUsers/alexey/adcumen/",
+		    "dir_videos": "videos",
+			"dir_frames": "frames_fps_10",
+			"dir_audios": "audios",
+
+		    "fileDescriptionVideos": "DataAdcumen/DatasetAdcumenStarR.csv",
+    		"fileIndividualProfiles": "DataAdcumen/advert_respondent_data.csv",
+            "fileVDB":  "DataAdcumen/VDB.pickle",
+
+			"file_train_listA": "/localstore/LocalUsers/alexey/adcumen/training",
+			"file_val_listA": "/localstore/LocalUsers/alexey/adcumen/validation",
+		    "file_test_listA": "/localstore/LocalUsers/alexey/adcumen/test",
+
+		    "file_train_list": "DataAdcumen/training_0",
+			"file_val_list": "DataAdcumen/valid_0_p2",
+		    "file_test_list": "DataAdcumen/valid_0_p1",
+
+		    "video_img_param": { "image_tmpl": "{:06d}.jpg", "img_input_size" : 256 , "img_output_size": 224},
+			"video_augmentation": {"RandomHorizontalFlip": true, "scales": [1, 0.875, 0.75, 0.66], "Adjust_sharpness": 2.0 ,"ColorJitter": false, "RandomGrayscale": 0.0, "GaussianBlur":false},
+			"audio_img_param": {"window_sizes": [25, 50, 100], "hop_sizes": [10, 25, 50], "n_mels": 224, "eps": 1e-6, "spec_size": [3, 224, 224], "num_segments": 1, "m_segments": 1},
+			"audio_augmentation": {"status":true, "random_shift_waveform": [0.1, 0.1]},
+
+			"fps": 10,
+
+		    "AdcumenDB": "DataAdcumen/VDB.pickle"
+	},
+
+
+
+	"TSM": {
+		"video_segments": 12,
+		"audio_segments": 1,
+		"motion": false,
+
+		"main": {
+				"arch": "resnet50_timm",
+				"pretrain": "imagenet",
+				"dropout": 0.5,
+				"last_pool": 1,
+				"input_mode": 2
+
+			},
+		"shift_temporal": {
+				"status": true,
+				"f_div": 8,
+				"shift_depth": 1,
+				"n_insert": 2,
+				"m_insert": 0
+			},
+		"shift_temporal_modality": {
+				"status": false,
+				"f_div": 8,
+				"n_insert": 2,
+				"m_insert": 1
+			},
+		"shift_spatial": {
+				"status": false,
+				"f_div": 8,
+				"n_insert": 2,
+				"m_insert": 1
+			},
+
+		"motion_param":{
+
+				"k_frames": 5,
+				"sharpen_cycles": 1,
+				"HW_conv_kernel": 9,
+				"HW_conv_sigma": 1.1,
+			    "normadd": 0
+		}
+	},
+
+    "net_run_param": {"epochs": 10, "batch_size": 64, "num_workers": 40},
+	"net_optim_param": {"lr": 1.0e-1, "lr_decay": [0.1, 3, 0.01, 6, 0.001, 8], "momentum":  0.9, "gd": 20 ,"weight_decay": 1e-4},
+
+    "save_epoch": [],
+	"root_folder": "logs"
+
+}
