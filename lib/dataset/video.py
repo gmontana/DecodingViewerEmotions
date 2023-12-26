@@ -103,6 +103,28 @@ def get_video_x(record, args,  mode_train_val):
 
 
 def vis_MDM(X, X_MOT, save_folder, id):
+    """
+    Process and save images from two input tensors.
+
+    This function iterates through the provided tensors, processing and saving images to the specified directory. It is designed to handle two related tensors, typically representing some form of original data and its processed counterpart. The exact nature of these tensors should be understood in the context of the calling code.
+
+    Parameters:
+    ----------
+    X : torch.Tensor
+        A tensor representing the original data. The expected dimensions and content should match the processing requirements of the function.
+    X_MOT : torch.Tensor
+        A tensor representing processed or derived data related to X. The dimensions should be compatible with X for corresponding operations.
+    save_folder : str
+        The directory path where the images will be saved. The function will generate image files in this directory.
+    id : str
+        An identifier used for naming the saved image files. This helps in distinguishing the output files.
+
+    Returns:
+    -------
+    None
+        Images are saved to the specified directory and no value is returned.
+
+    """
 
     [b, m, n, t, c, h, w] = X.size()
     [b, m, n, c, h, w] = X_MOT.size()
@@ -126,6 +148,27 @@ def vis_MDM(X, X_MOT, save_folder, id):
 
 
 def vis_X(X,  save_folder, id):
+    """
+    Save images from a tensor to a specified directory.
+
+    This function processes the input tensor 'X', which is expected to represent image data, and saves the images to the specified directory. Each image is saved individually with a naming convention that includes the provided identifier 'id'.
+
+    Parameters:
+    ----------
+    X : torch.Tensor
+        A tensor representing image data. The tensor is expected to contain image information that can be processed and saved as individual image files. The exact dimensions and content of the tensor should be understood in the context of the calling code.
+    save_folder : str
+        The directory path where the images will be saved. The function will generate image files in this directory.
+    id : str
+        An identifier used for naming the saved image files. This helps in distinguishing the output files.
+
+    Returns:
+    -------
+    None
+        Images are saved to the specified directory and no value is returned.
+
+    """
+
     print("vis_X", X.size())
     X = X.view((-1, ) + X.size()[-3:])
     (n, c, h, w) = X.size()
@@ -138,6 +181,20 @@ def vis_X(X,  save_folder, id):
 
 
 def scales_pairs(scales):
+    """
+    Generate pairs of scales for augmentation.
+
+    Parameters:
+    ----------
+    scales: list
+        List of scale values.
+
+    Returns:
+    -------
+    list
+        List of tuples representing scale pairs.
+    """
+
     pairs = []
     for i1 in range(len(scales)):
         for i2 in range(len(scales)):
@@ -148,6 +205,26 @@ def scales_pairs(scales):
 
 
 def augmentation_video(X, scales, img_output_size, param):
+    """
+    Apply augmentation to video tensor.
+
+    Parameters:
+    ----------
+    X: torch.Tensor
+        The video tensor to augment.
+    scales: list
+        List of scale values for random cropping.
+    img_output_size: int
+        The size of the output image after resizing.
+    param: dict
+        Dictionary containing augmentation parameters.
+
+    Returns:
+    -------
+    torch.Tensor
+        The augmented video tensor.
+    """
+
     pairs = scales_pairs(scales)
     (C, H, W) = X.size()[-3:]
     # print("X.size()", X.size())
@@ -178,6 +255,23 @@ def augmentation_video(X, scales, img_output_size, param):
 
 
 def validation_transform(X, img_input_size, img_output_size):
+    """
+    Apply validation transformations to video tensor.
+
+    Parameters:
+    ----------
+    X: torch.Tensor
+        The video tensor to transform.
+    img_input_size: int
+        The input size of the image.
+    img_output_size: int
+        The output size of the image after transformation.
+
+    Returns:
+    -------
+    torch.Tensor
+        The transformed video tensor.
+    """
 
     (C, H, W) = X.size()[-3:]
     s = img_input_size  # int(img_output_size * 1.20)#
@@ -194,6 +288,24 @@ def validation_transform(X, img_input_size, img_output_size):
 
 
 def size_i_add_from_record(record, fps, t_length):
+    """
+    Calculate size and index addition from the record.
+
+    Parameters:
+    ----------
+    record: dict
+        A dictionary containing information about the video record.
+    fps: int
+        Frames per second of the video.
+    t_length: int
+        Length of the time segment.
+
+    Returns:
+    -------
+    tuple
+        A tuple containing the size and index addition.
+    """
+
     size = record["imagefolder_size"]
     t_start = record["t"]
 
@@ -212,6 +324,25 @@ def size_i_add_from_record(record, fps, t_length):
 
 
 def sample_indices_training(size, num_segments, k_frames, i_add):
+    """
+    Sample indices for training.
+
+    Parameters:
+    ----------
+    size: int
+        The size of the video or segment.
+    num_segments: int
+        The number of segments to sample.
+    k_frames: int
+        The number of frames per segment.
+    i_add: int
+        Index addition for the sampling.
+
+    Returns:
+    -------
+    numpy.ndarray
+        Array of sampled indices.
+    """
 
     average_duration = size // (2*num_segments)
     tick = size / float(num_segments)
@@ -224,6 +355,25 @@ def sample_indices_training(size, num_segments, k_frames, i_add):
 
 
 def sample_indices_validation(size, num_segments, k_frames, i_add):
+    """
+    Sample indices for validation.
+
+    Parameters:
+    ----------
+    size: int
+        The size of the video or segment.
+    num_segments: int
+        The number of segments to sample.
+    k_frames: int
+        The number of frames per segment.
+    i_add: int
+        Index addition for the sampling.
+
+    Returns:
+    -------
+    numpy.ndarray
+        Array of sampled indices.
+    """
     tick = size / float(num_segments)
     indices = np.array([int(tick / 2.0 + tick * x)
                        for x in range(num_segments)])
