@@ -9,24 +9,12 @@ from lib.utils.set_folders import check_rootfolders, get_file_results, define_ro
 
 
 def p2str(p1):
-    """
-    Convert a parameter list to a string representation.
-
-    Parameters:
-    ----------
-    p1 : list or other
-        The parameter to convert to string.
-
-    Returns:
-    -------
-    str
-        A string representation of the parameter.
-    """
-
+    # Function to convert parameter list to string representation
     return "_".join([str(int) for int in p1]) if isinstance(p1, list) else str(p1)
 
 
 def parse_arguments():
+    # Function to parse command-line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_path", type=str, required=True)
     parser.add_argument("--cuda_ids", type=str)  # e.g., "0_1_2_3"
@@ -34,23 +22,13 @@ def parse_arguments():
 
 
 def mknewfolder(folder):
-    """
-    Create a new folder if it does not exist.
-
-    Parameters:
-    ----------
-    folder : str
-        The path of the folder to create.
-
-    """
-    if os.path.exists(folder):
-        print('folder exist ', folder)
-    else:
-        print('creating folder ' + folder)
-        os.mkdir(folder)
+    # Function to create a new folder if it does not exist
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 
 def setup_directories(args, today):
+    # Function to set up directories for saving results
     screen_id = "screen_" + today
     screen_folder_base = os.path.join(args["root_folder"], screen_id)
     mknewfolder(screen_folder_base)
@@ -60,6 +38,7 @@ def setup_directories(args, today):
 
 
 def run_experiment(args, args_in, script, screen_id, results_folder):
+    # Function to run an experiment with given parameters
     agrs_json = os.path.join(results_folder, 'args.json')
     with open(agrs_json, 'w') as f:
         json.dump(args, f, indent=4)
@@ -74,12 +53,7 @@ def run_experiment(args, args_in, script, screen_id, results_folder):
 
 
 def main():
-    """
-    Main function to set up and run a series of experiments.
-    This script reads configuration, sets up directories for results, and iterates over a range of parameters to run experiments. 
-    It is used for training or evaluating a machine learning model with different configurations.
-
-    """
+    # Main function to set up and run a series of experiments
     args_in = parse_arguments()
     args = loadarg(args_in.config_path)
     today = date.today().strftime("%d_%m_%Y")
