@@ -1,3 +1,22 @@
+"""
+video.py
+
+Overview:
+This script contains functions and classes for handling video data in machine learning tasks. It includes utilities
+for loading video files, extracting frames, performing temporal sampling, and applying video-specific transformations
+and augmentations. 
+
+Functions:
+- Video frame extraction and temporal sampling.
+- Video data augmentation techniques.
+- Utilities for loading and processing video files.
+
+Usage:
+The functions and classes in this script are used throughout the data loading and preprocessing stages of a video-based
+machine learning pipeline. They are typically called when constructing video datasets or directly within model training
+scripts to prepare video data for model input.
+"""
+
 import torch.utils.data as data
 from PIL import Image
 import os

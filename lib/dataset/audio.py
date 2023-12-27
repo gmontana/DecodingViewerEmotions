@@ -1,3 +1,22 @@
+"""
+audio.py
+
+Overview:
+This script contains functions and classes for handling audio data in machine learning tasks. It includes utilities
+for loading audio files, processing waveforms, extracting features like spectrograms, and applying audio data augmentations.
+
+Functions:
+- Functions for waveform manipulation and feature extraction.
+- Audio data augmentation techniques.
+- Utilities for loading and processing audio files.
+
+Usage:
+The functions and classes in this script are used throughout the data loading and preprocessing stages of an audio-based
+machine learning pipeline. They are typically called when constructing datasets or directly within model training scripts
+to prepare audio data for model input.
+"""
+
+
 import torch.utils.data as data
 from PIL import Image
 import os
