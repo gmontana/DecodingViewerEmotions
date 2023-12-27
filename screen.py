@@ -1,3 +1,31 @@
+"""
+screen.py
+
+Overview:
+This script is designed to set up and run a series of experiments, typically for the purpose of hyperparameter tuning
+or model comparison. It reads configuration from a specified file, sets up directories for saving results, and iterates
+over a range of parameters to run experiments using a specified script (often a training or evaluation script).
+
+The script is useful for automating the process of running many experiments with different configurations and
+collecting the results systematically.
+
+Functions:
+- parse_arguments: Parses command-line arguments for the script.
+- mknewfolder: Creates a new folder if it does not exist.
+- setup_directories: Sets up directories for saving results of the experiments.
+- p2str: Converts a parameter list to a string representation.
+- run_experiment: Runs an individual experiment with the given parameters.
+- main: The main function to set up and run a series of experiments.
+
+Usage:
+The script is typically run from the command line with arguments specifying the configuration file and other options.
+For example:
+python screen.py --config_path path/to/config.json --cuda_ids 0_1_2_3
+
+The specific arguments and their usage may vary based on the implementation and requirements of the experiment process.
+"""
+
+
 import os
 import json
 import argparse
