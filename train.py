@@ -195,8 +195,7 @@ def run_epoch(epoch, DataLoaders, model, device, optimizer, criterion, DataParal
     acc_test, conf_matrix_test = multiclass_accuracy(y_true, y_pred)
     accE_test = remap_acc_to_emotions(acc, TestDataSet)
 
-    """checkpoint"""
-
+    # Checkpoints
     best_score["unbalanced"], is_best_score = checkpoint_acc(
         "unbalanced", args["checkpoint"], epoch, best_score["unbalanced"], val_score["unbalanced"],  model, optimizer, DataParallel)
     best_score["balanced"], is_best_score = checkpoint_acc(
@@ -207,8 +206,7 @@ def run_epoch(epoch, DataLoaders, model, device, optimizer, criterion, DataParal
     best_score["balanced"], is_best_score = checkpoint_confusion_matrix(
         "balanced", args["checkpoint"], epoch, best_score["balanced"], val_score["balanced"], conf_matrix, accE)
 
-    """saving results to file_results at args.root_folder"""
-
+    # Saving results to file_results at args.root_folder
     history_score[epoch] = {"training": train_score,
                             "valid": val_score, "accE": accE,
                             "test": test_score, "accE": accE_test,
@@ -361,7 +359,86 @@ def train(train_loader, model, device, criterion, optimizer, epoch):
         return score
 
 
+def setup_scores():
+    """
+    Initialize the scoring dictionaries.
+
+    Returns
+    -------
+    tuple
+        Tuple containing best_score and history_score dictionaries.
+    """
+    best_score, history_score = {}, {}
+    best_score["balanced"], best_score["unbalanced"] = 0.00, 0.00
+    return best_score, history_score
+
+
+def model_initialization(args_in):
+    """
+    Initialize the model and load the checkpoint if specified.
+
+    Parameters
+    ----------
+    args_in : Namespace
+        The parsed command line arguments.
+
+    Returns
+    -------
+    tuple
+        Tuple containing initialized model and other related objects.
+    """
+    args_model = loadarg(f"{args_in.model}/args.json")
+    path_checkpoint = f"{args_in.model}/checkpoint/balanced.ckpt.pth.tar"
+
+    model, DataParallel, device, device_id, optimizer, criterion = initialise_model(
+        args_in, args_model)
+    model, optimizer, data_state = load_model(
+        path_checkpoint, model, optimizer, DataParallel=DataParallel, Filter_layers={})
+    print("data_state", data_state)
+
+    return model, DataParallel, device, device_id, optimizer, criterion
+
+
+def setup_data_loaders(args_in, args):
+    """
+    Setup data loaders for training, validation, and testing.
+
+    Parameters
+    ----------
+    args_in : Namespace
+        The parsed command line arguments.
+    args : dict
+        The adjusted arguments dictionary.
+
+    Returns
+    -------
+    list
+        List of data loaders for training, validation, and testing.
+    """
+    if args_in.porog:
+        fixed_porog = args["emotion_jumps"]["porog"]
+        TrainDataSet = GetDataSet(
+            args, mode_train_val="training", fixed_porogs=fixed_porog)
+        ValidDataSet = GetDataSet(
+            args, mode_train_val="validation", fixed_porogs=fixed_porog)
+    else:
+        TrainDataSet = GetDataSet(
+            args, mode_train_val="training", fixed_porogs=-1)
+        ValidDataSet = GetDataSet(
+            args, mode_train_val="validation", fixed_porogs=-1)
+        TestDataSet = GetDataSet(args, mode_train_val="test", fixed_porogs=-1)
+
+    TrainDataLoader = GetDataLoaders(TrainDataSet, args)
+    ValidDataLoader = GetDataLoaders(ValidDataSet, args)
+    TestDataLoader = GetDataLoaders(TestDataSet, args)
+
+    return [TrainDataLoader, ValidDataLoader, TestDataLoader, TrainDataSet, ValidDataSet, TestDataSet]
+
+
 def main():
+    """
+    Main function to run the training process.
+    """
 
     global args, best_score, history_score
     best_score, history_score = {}, {}
@@ -370,24 +447,15 @@ def main():
     args_in = parse_arguments()
     args = load_and_adjust_args(args_in)
 
-    args_in = parser.parse_args()
-    args = loadarg(args_in.config)
-
-    """Adjust args with args_in"""
-    args = adjust_args_in(args, args_in)
-
-    #####################################################################################
-
+    # Model initialization and other setup based on the provided code
     if args_in.model:
-
         args_model = loadarg(f"{args_in.model}/args.json")
         path_checkpoint = f"{args_in.model}/checkpoint/balanced.ckpt.pth.tar"
 
         model, DataParallel, device, device_id, optimizer, criterion = initialise_model(
             args_in, args_model)
-
-        (model, optimizer, data_state) = load_model(path_checkpoint,
-                                                    model, optimizer, DataParallel=DataParallel, Filter_layers={})
+        model, optimizer, data_state = load_model(
+            path_checkpoint, model, optimizer, DataParallel=DataParallel, Filter_layers={})
         print("data_state", data_state)
 
         args_data = args_model.copy()
@@ -412,44 +480,20 @@ def main():
 
         exit()
 
-    """DataLoaders"""
-    if args_in.porog:
-        fixed_porog = args["emotion_jumps"]["porog"]
-        TrainDataSet = GetDataSet(
-            args, mode_train_val="training", fixed_porogs=fixed_porog)
-        ValidDataSet = GetDataSet(
-            args, mode_train_val="validation", fixed_porogs=fixed_porog)
-    else:
-        TrainDataSet = GetDataSet(
-            args, mode_train_val="training", fixed_porogs=-1)
-        ValidDataSet = GetDataSet(
-            args, mode_train_val="validation", fixed_porogs=-1)
-        TestDataSet = GetDataSet(args, mode_train_val="test", fixed_porogs=-1)
-
-    # exit()
-
-    TrainDataLoader = GetDataLoaders(TrainDataSet, args)
-    ValidDataLoader = GetDataLoaders(ValidDataSet, args)
-    TestDataLoader = GetDataLoaders(TestDataSet, args)
-    DataLoaders = [TrainDataLoader, ValidDataLoader,
-                   TestDataLoader, TrainDataSet, ValidDataSet, TestDataSet]
-
-    args["TSM"]["num_class"] = len(TrainDataSet.map_label)
+    DataLoaders = setup_data_loaders(args_in, args)
+    # Assuming TrainDataSet is at index 3
+    args["TSM"]["num_class"] = len(DataLoaders[3].map_label)
     print("args.num_class", args["TSM"]["num_class"])
 
     model, DataParallel, device, device_id, optimizer, criterion = initialise_model(
         args_in, args)
-
     cudnn.benchmark = True
-
-    """Create output folders"""
     check_rootfolders(args)
     print('Results would be stored at: ', args["output_folder"])
 
-    """ TRAINING """
+    # Training loop
     for epoch in range(args["start_epoch"], args["last_epoch"]):
 
-        """print model args"""
         from lib.utils.report import report_model_param
         report_model_param(args)
 
