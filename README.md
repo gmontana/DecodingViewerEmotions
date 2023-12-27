@@ -43,16 +43,20 @@ python3 predict.py --data config/adcumen1_ortigia.json  --id f16_BG0_RGB_audio_1
 
 where the parameters are:
 
---data (config/adcumen1_ortigia.json): This parameter specifies the path to the JSON configuration file that contains settings or data definitions needed for predictions. This file typically includes paths to datasets, preprocessing details, and other relevant information required to set up the data for prediction.
+    --data (config/adcumen1_ortigia.json): This parameter specifies the path to the JSON configuration file that contains settings or data definitions needed for predictions. This file typically includes paths to datasets, preprocessing details, and other relevant information required to set up the data for prediction.
 
---id (f16_BG0_RGB_audio_16_INET21K): This is an identifier for the prediction task. It might be used to name output files or directories, making it easier to track and organize results, especially when making predictions on different sets or types of data.
+    --id (f16_BG0_RGB_audio_16_INET21K): This is an identifier for the prediction task. It might be used to name output files or directories, making it easier to track and organize results, especially when making predictions on different sets or types of data.
 
---type (test): This parameter specifies the mode or type of prediction being run. Common types might include test, validation, or predict. Each type might correspond to different data sets or different modes of operation in the script. For example, test might use a held-out portion of the data to evaluate the model's performance.
+    --type (test): This parameter specifies the mode or type of prediction being run. Common types might include test, validation, or predict. Each type might correspond to different data sets or different modes of operation in the script. For example, test might use a held-out portion of the data to evaluate the model's performance.
 
---model (logs/screen_multiclass_may/ad_timm_16f_j05_BG0/0_1_2_3_4_5_6_7_8_0.5_0.5_0.1_1_resnet50_timm_16_0_1_adcumen): This parameter specifies the path to the directory containing the trained model and its associated files, like weights (checkpoint) and configuration (args.json). The script will load this model for making predictions. The path typically includes the directory where the model is saved, and it's essential that this directory contains all necessary files for loading the model.
+    --model (logs/screen_multiclass_may/ad_timm_16f_j05_BG0/0_1_2_3_4_5_6_7_8_0.5_0.5_0.1_1_resnet50_timm_16_0_1_adcumen): This parameter specifies the path to the directory containing the trained model and its associated files, like weights (checkpoint) and configuration (args.json). The script will load this model for making predictions. The path typically includes the directory where the model is saved, and it's essential that this directory contains all necessary files for loading the model.
+
+- predict_annotate_video.py: to make predictions at the full video level
 
 
-## Screen 
+## Automaation
+
+- screen.py: automate the training
 
 An example is
 
@@ -64,3 +68,5 @@ this would screen jumps 0.1 0.5 1 2 3 percentiles
 
 Results would be stored in folder:  logs/screen_23_01_2023/results
 
+
+- screen_predict.py: automate the predictions
