@@ -1,34 +1,65 @@
 import argparse
 import json
 import os
-
 import torch
 import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
-
 from tqdm import tqdm
-
 from sklearn.metrics import balanced_accuracy_score, accuracy_score
 import warnings
 from sklearn.exceptions import DataConversionWarning
 from sklearn.metrics import confusion_matrix
-
-
 from collections import Counter
-
 from lib.dataset.dataset import GetDataSet, GetDataLoaders
-from lib.utils.utils import loadarg,  AverageMeter, get_labels, remap_acc_to_emotions, multiclass_accuracy
+from lib.utils.utils import loadarg, AverageMeter, get_labels, remap_acc_to_emotions, multiclass_accuracy
 from lib.utils.config_args import adjust_args_in
 from lib.utils.set_gpu import set_model_DataParallel, set_cuda_device
 from lib.utils.set_folders import check_rootfolders, get_file_results
 from lib.utils.saveloadmodels import checkpoint_acc, save_timepoint, load_model, checkpoint_confusion_matrix
-
 from lib.model.model import VCM
 from lib.model.prepare_input import X_input
 from lib.model.backbone import BackBone
-
 from lib.model.policy import gradient_policy
+
+
+def parse_arguments():
+    """
+    Parse command line arguments.
+
+    Returns
+    -------
+    Namespace
+        The namespace containing the command line arguments.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str)  # config/
+    parser.add_argument("--resume", type=str)
+    parser.add_argument("--model", type=str)
+    parser.add_argument("--cuda_ids", type=str)  # 0_1_2_3
+    parser.add_argument("--run_id", type=str)
+    parser.add_argument('--market_filtr', nargs="+", type=int)
+    parser.add_argument('--porog', type=int)
+    return parser.parse_args()
+
+
+def load_and_adjust_args(args_in):
+    """
+    Load and adjust the configuration arguments.
+
+    Parameters
+    ----------
+    args_in : Namespace
+        The parsed command line arguments.
+
+    Returns
+    -------
+    dict
+        The adjusted arguments dictionary.
+    """
+    args = loadarg(args_in.config)
+    args = adjust_args_in(args, args_in)
+    return args
 
 
 def initialise_model(args_in, args):
@@ -53,7 +84,6 @@ def initialise_model(args_in, args):
     model_BB = BackBone(args["TSM"])
     model = VCM(args["TSM"], model_X, model_BB)
 
-    """set_cuda_device"""
     device, device_id, args = set_cuda_device(args_in, args)
     model, DataParallel = set_model_DataParallel(args, model)
     model.to(device)
@@ -337,14 +367,8 @@ def main():
     best_score, history_score = {}, {}
     best_score["balanced"], best_score["unbalanced"] = 0.00, 0.00
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str)  # config/
-    parser.add_argument("--resume", type=str)
-    parser.add_argument("--model", type=str)
-    parser.add_argument("--cuda_ids", type=str)  # 0_1_2_3
-    parser.add_argument("--run_id", type=str)
-    parser.add_argument('--market_filtr', nargs="+", type=int)
-    parser.add_argument('--porog', type=int)
+    args_in = parse_arguments()
+    args = load_and_adjust_args(args_in)
 
     args_in = parser.parse_args()
     args = loadarg(args_in.config)
