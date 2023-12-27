@@ -1,3 +1,25 @@
+"""
+temporal_fusion.py
+
+Overview:
+This script defines classes and functions related to temporal fusion or shifting in neural network models. Temporal fusion
+is a technique often used in video or sequence processing tasks to enhance the model's understanding of temporal dynamics
+by shifting features across time or modality. The script includes the TempoModalShift class for applying temporal shifts
+to layers and utility functions for integrating these shifts into existing network architectures.
+
+Classes:
+- TempoModalShift: A class for applying temporal shifts to model layers.
+
+Functions:
+- shift_block: Applies the TempoModalShift to blocks within a stage of a network.
+- make_Shift: Integrates temporal shifting into an entire network architecture.
+
+Usage:
+The classes and functions in this script are typically used to modify existing network architectures, such as ResNet or
+DenseNet, to include temporal shifting capabilities. They are used in the construction or modification of models for
+tasks that involve temporal or sequential data, such as video classification or activity recognition.
+"""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -8,7 +30,38 @@ import timm
 
 class TempoModalShift(nn.Module):
     """
-    Parameters:
+    TempoModalShift is a module for applying temporal shifts to model layers. It is designed to enhance the model's
+    understanding of temporal dynamics by shifting features across time or modality.
+
+    Parameters
+    ----------
+    layer : torch.nn.Module
+        The layer to which the temporal shift will be applied.
+    n_video_segments : int
+        The number of video segments to consider for shifting.
+    n_motion_segments : int
+        The number of motion segments to consider for shifting.
+    n_audio_segments : int
+        The number of audio segments to consider for shifting.
+    input_mode : int
+        Specifies how different input types should be combined or processed.
+    f_div : int
+        The rate of features to fuse/shift.
+    shift_depth : int
+        The depth of shifting to apply.
+    mode : str
+        The mode of shifting (e.g., "shift_temporal", "shift_temporal_modality").
+
+    Methods
+    -------
+    forward(x):
+        Applies the temporal shift to the input tensor and passes it through the layer.
+    shift_temporal(x):
+        Applies a temporal shift to the input tensor.
+    shift_temporal_modality(x):
+        Applies a temporal shift across modalities to the input tensor.
+
+    Note from Alexei - Patameters:
         f_div=8 rate of features to fuse/shift
         self.n_video_segments = param_TSM["video_segments"] #[8, 8, 1]
         self.n_audio_segments = param_TSM["audio_segments"]  # [8, 8, 1]
@@ -92,6 +145,37 @@ class TempoModalShift(nn.Module):
 
 
 def shift_block(stage, n_video_segments, n_motion_segments, n_audio_segments, input_mode,  f_div,  shift_depth, mode, n_insert, m_insert):
+    """
+    Applies the TempoModalShift to blocks within a stage of a network.
+
+    Parameters
+    ----------
+    stage : torch.nn.Module
+        The stage of the network containing multiple blocks.
+    n_video_segments : int
+        The number of video segments to consider for shifting.
+    n_motion_segments : int
+        The number of motion segments to consider for shifting.
+    n_audio_segments : int
+        The number of audio segments to consider for shifting.
+    input_mode : int
+        Specifies how different input types should be combined or processed.
+    f_div : int
+        The rate of features to fuse/shift.
+    shift_depth : int
+        The depth of shifting to apply.
+    mode : str
+        The mode of shifting (e.g., "shift_temporal", "shift_temporal_modality").
+    n_insert : int
+        The interval at which to insert shifts within the stage.
+    m_insert : int
+        The specific blocks within the interval to apply the shift.
+
+    Returns
+    -------
+    torch.nn.Module
+        The modified stage with TempoModalShift applied to specific blocks.
+    """
     blocks = list(stage.children())
     for i, b in enumerate(blocks):
         if i % n_insert == m_insert:
@@ -104,6 +188,37 @@ def shift_block(stage, n_video_segments, n_motion_segments, n_audio_segments, in
 
 
 def make_Shift(net, n_video_segments, n_motion_segments, n_audio_segments,  input_mode,  f_div,  shift_depth, mode, n_insert, m_insert):
+    """
+    Integrates temporal shifting into an entire network architecture.
+
+    Parameters
+    ----------
+    net : torch.nn.Module
+        The network to which the temporal shifts will be applied.
+    n_video_segments : int
+        The number of video segments to consider for shifting.
+    n_motion_segments : int
+        The number of motion segments to consider for shifting.
+    n_audio_segments : int
+        The number of audio segments to consider for shifting.
+    input_mode : int
+        Specifies how different input types should be combined or processed.
+    f_div : int
+        The rate of features to fuse/shift.
+    shift_depth : int
+        The depth of shifting to apply.
+    mode : str
+        The mode of shifting (e.g., "shift_temporal", "shift_temporal_modality").
+    n_insert : int
+        The interval at which to insert shifts within the network.
+    m_insert : int
+        The specific blocks within the interval to apply the shift.
+
+    Notes
+    -----
+    This function modifies the provided network by integrating temporal shifts into its architecture. It is typically
+    used to enhance models for tasks involving temporal or sequential data.
+    """
 
     if isinstance(net, (torchvision.models.ResNet, timm.models.ResNet)):
 

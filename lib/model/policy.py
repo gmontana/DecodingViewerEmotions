@@ -1,3 +1,29 @@
+"""
+policy.py
+
+Overview:
+This script defines various policies and functions for managing the training process of neural network models.
+These policies include freezing and unfreezing layers, adjusting learning rates, and reinitializing weights.
+The functions are typically used to modify the behavior of the model during training to improve performance,
+prevent overfitting, or adapt to specific training phases.
+
+Functions:
+- freeze_layers: Freeze specific layers of the network while allowing others to continue training.
+- unfreeze_layers: Unfreeze specific layers of the network while keeping others frozen.
+- count_free_layers: Count the number of trainable (free) and frozen layers in the network.
+- freeze_policy: Apply a freezing policy to the network based on the current epoch.
+- gradient_policy: Adjust the learning rate of the optimizer based on the epoch according to a predefined schedule.
+- get_optim_policy: Apply the optimization policy for the network based on the current epoch.
+- freeze_BN_layers: Freeze Batch Normalization (BN) layers in the network.
+- freeze_BLOCK_layers_hard: Apply a hard freeze policy to specific blocks of layers in the network.
+- freeze_BLOCK_layers_soft: Apply a soft freeze policy to specific blocks of layers in the network.
+- restart_fc_layers: Reinitialize the weights of fully connected (fc) layers in the network.
+
+Usage:
+The functions in this script are typically called during the training loop of a model to apply various optimization
+and regularization strategies. They are used to modify the model's parameters, structure, or learning rate based on
+the current epoch or other conditions.
+"""
 
 
 import torch
