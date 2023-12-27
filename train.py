@@ -168,15 +168,16 @@ def run_epoch(epoch, DataLoaders, model, device, optimizer, criterion, DataParal
 
     Returns
     -------
-    None
-
+    dict
+        A dictionary containing various metrics and results from the epoch.
     """
 
-    global best_score,  test_score, history_score
+    global best_score, test_score, history_score
 
     [TrainDataLoader, ValidDataLoader, TestDataLoader,
-        TrainDataSet, ValidDataSet, TestDataSet] = DataLoaders
+     TrainDataSet, ValidDataSet, TestDataSet] = DataLoaders
 
+    # Unite positive and negative samples if necessary
     TrainDataSet.unite_positive_negative()
     train_score = train(TrainDataLoader, model, device,
                         criterion, optimizer, epoch)
@@ -206,15 +207,43 @@ def run_epoch(epoch, DataLoaders, model, device, optimizer, criterion, DataParal
     best_score["balanced"], is_best_score = checkpoint_confusion_matrix(
         "balanced", args["checkpoint"], epoch, best_score["balanced"], val_score["balanced"], conf_matrix, accE)
 
-    # Saving results to file_results at args.root_folder
-    history_score[epoch] = {"training": train_score,
-                            "valid": val_score, "accE": accE,
-                            "test": test_score, "accE": accE_test,
-                            }
-    result = {'best_score': best_score,  'history_score': history_score}
-    file_results = get_file_results(args)
+    # Compile results into a dictionary or similar structure
+    epoch_results = {
+        "train_score": train_score,
+        "val_score": val_score,
+        "test_score": test_score,
+        "y_pred": y_pred,
+        "y_true": y_true,
+        "acc": acc,
+        "acc_test": acc_test,
+        "conf_matrix": conf_matrix,
+        "conf_matrix_test": conf_matrix_test,
+        "accE": accE,
+        "accE_test": accE_test,
+        "best_score": best_score,
+        "is_best_score": is_best_score
+    }
+
+    return epoch_results
+
+
+def save_epoch_results(epoch_results, epoch, args):
+    """
+    Save the results of an epoch to a file.
+
+    Parameters
+    ----------
+    epoch_results : dict
+        The results from an epoch of training/validation.
+    epoch : int
+        The current epoch number.
+    args : dict
+        The script arguments or other configuration.
+    """
+    # Determine file path and save the results
+    file_results = get_file_results(args, epoch)  # Adjust as needed
     with open(file_results, 'w') as f:
-        json.dump(result, f, indent=4)
+        json.dump(epoch_results, f, indent=4)
 
 
 def validate(val_loader, model, device, criterion, epoch):
@@ -503,8 +532,13 @@ def main():
                     f"epoch_{epoch}", args["checkpoint"],  model, optimizer, DataParallel)
 
         gradient_policy(args, epoch, optimizer)
-        run_epoch(epoch, DataLoaders, model, device, optimizer,
-                  criterion, DataParallel=DataParallel)
+
+        # Run the epoch and get results
+        epoch_results = run_epoch(
+            epoch, DataLoaders, model, device, optimizer, criterion, DataParallel)
+
+        # Save results
+        save_epoch_results(epoch_results, epoch, args)
 
 
 if __name__ == '__main__':
