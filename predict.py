@@ -1,12 +1,12 @@
-
 """
-This script is used for making predictions with a trained model. It loads a model and its weights, sets up the data
-for prediction, and runs the model to make predictions on new data. The predictions are then saved for further analysis.
+predict.py
 
-The script handles different modes of operation such as validation, test, or actual prediction and allows for
-customization of various parameters through command-line arguments.
+Overview:
+This script is used for making predictions with a trained model. It handles various modes of operation such as validation, test, or actual prediction and allows for customization of parameters through command-line arguments. The script loads a model and its weights, sets up the data for prediction, and runs the model to make predictions on new data. The predictions are then saved for further analysis or use.
 
-Functions:
+The script is designed to be flexible and customizable, supporting different datasets, models, and prediction modes. It is typically used as part of a larger machine learning pipeline, following the training and evaluation of the model.
+
+Key Functions:
 - save_pickle: Saves a dictionary object to a file using pickle.
 - load_pickle: Loads a dictionary object from a pickle file.
 - load_predict: Loads prediction results from files.
@@ -14,7 +14,18 @@ Functions:
 - predictV2: Makes predictions using the model on the provided data loader.
 - run_model: Sets up and runs the model for prediction.
 - assemble: Assembles prediction results for analysis.
-- main: The main function to run the prediction process.
+- main: The main function orchestrating the prediction process.
+
+Usage:
+The script is typically run from the command line with the necessary model, data, and configuration specified. It then automatically processes the data, runs the model to make predictions, and saves the results.
+
+Example Command:
+python predict.py --data config/adcumen1_ortigia.json --model logs/screen_multiclass_may/ad_timm_16f_j05_BG0/0_1_2_3_4_5_6_7_8_0.5_0.5_0.1_1_resnet50_timm_16_0_1_adcumen --cuda_ids 0_1_2_3 --type test --id f16_BG0_RGB_audio_16_INET21K
+
+This command would run the script, executing the model on the specified data and saving the predictions. The script is useful in scenarios where automated, batch processing of predictions is required.
+
+Note:
+Ensure that the model, data, and other configurations are correctly set up and accessible. The script assumes that the model is trained and the data is prepared for prediction. The output format and structure of the predictions should be compatible with any downstream processes or scripts that use them.
 """
 
 import argparse
