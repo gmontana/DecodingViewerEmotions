@@ -1,3 +1,27 @@
+"""
+load_data_base.py
+
+Overview:
+This script is designed to load and process a video database for use in machine learning models. It includes functions to 
+parse command-line arguments, load configuration files, and process the video database according to specified parameters. 
+The script is typically used as a preliminary step in a larger pipeline, preparing video data for training or evaluation.
+
+Functions:
+- parse_arguments: Parses command-line arguments for the script.
+- load_configuration: Loads and validates the configuration file specified by the user.
+- process_video_database: Loads and processes the video database based on the provided configuration.
+- main: The main function orchestrating the loading and processing of the video database.
+
+Usage:
+The script is typically run from the command line with an argument specifying the configuration file. For example:
+python load_data_base.py --config path/to/config.json
+
+The configuration file should specify paths and parameters for the video database, including where to find the video
+data and any preprocessing or filtering steps required. The script then processes the video database accordingly and
+prepares it for further use in the machine learning pipeline.
+"""
+
+
 import argparse
 import os
 import logging
@@ -103,4 +127,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
