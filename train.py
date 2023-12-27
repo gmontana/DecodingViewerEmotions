@@ -1,5 +1,39 @@
-import argparse
+"""
+train.py
+
+Overview:
+This script is responsible for training a neural network model. It sets up the model, data, and training environment
+based on the provided configuration and command-line arguments. The script handles tasks such as loading data,
+initializing the model, setting up the optimizer and loss function, and running the training loop.
+
+The training loop typically involves iterating over the training data, making predictions, calculating loss,
+and updating the model parameters. The script may also handle validation and checkpointing of the model.
+
+Functions:
+- parse_arguments: Parses command-line arguments.
+- load_and_adjust_args: Loads and adjusts configuration based on arguments.
+- initialise_model: Initializes the model, optimizer, and criterion.
+- validate_external_data: Validates the model using external data.
+- run_epoch: Runs a single epoch of training and validation.
+- save_epoch_results: Saves the results of an epoch to a file.
+- validate: Validates the model for a single epoch using the given data loader.
+- train: Conducts a single epoch of training over the provided data.
+- setup_scores: Initializes scoring dictionaries.
+- model_initialization: Initializes the model and loads the checkpoint if specified.
+- setup_data_loaders: Sets up data loaders for training, validation, and testing.
+- main: The main function to run the training process.
+
+Usage:
+The script is typically run from the command line with various arguments specifying the model, data, and training
+configuration. For example:
+python train.py --config path/to/config.json --model path/to/model/dir --...
+
+The specific arguments and their usage may vary based on the implementation and requirements of the training process.
+"""
+
+
 import json
+import argparse
 import os
 import torch
 import torch.nn.parallel
@@ -80,10 +114,12 @@ def initialise_model(args_in, args):
 
     """
 
+    # Model componennts creation
     model_X = X_input(args["TSM"])
     model_BB = BackBone(args["TSM"])
     model = VCM(args["TSM"], model_X, model_BB)
 
+    # Device setup
     device, device_id, args = set_cuda_device(args_in, args)
     model, DataParallel = set_model_DataParallel(args, model)
     model.to(device)
@@ -91,9 +127,12 @@ def initialise_model(args_in, args):
     print("device, device_id", device, device_id)
     print("DataParallel", DataParallel)
 
+    # Optimiser initialisation
     optimizer = torch.optim.SGD(model.parameters(), args["net_optim_param"]["lr"],
                                 momentum=args["net_optim_param"]["momentum"],
                                 weight_decay=args["net_optim_param"]["weight_decay"])
+
+    # Criterion (loss function) initialisation
     criterion = torch.nn.CrossEntropyLoss().to(device)
 
     return model, DataParallel, device, device_id, optimizer, criterion
@@ -103,7 +142,7 @@ def validate_external_data(args, args_data, model, device, criterion, mode_train
     """
     Validate the model using external data.
 
-    Parameters
+   Parameters
     ----------
     args : dict
         The arguments loaded from the configuration file.
@@ -320,6 +359,36 @@ def validate(val_loader, model, device, criterion, epoch):
 
 
 def train(train_loader, model, device, criterion, optimizer, epoch):
+    """
+    Conduct a single epoch of training over the provided data.
+
+    Parameters
+    ----------
+    train_loader : DataLoader
+        The DataLoader providing the training dataset.
+    model : torch.nn.Module
+        The neural network model to be trained.
+    device : torch.device
+        The device on which to perform training (CPU or GPU).
+    criterion : torch.nn.modules.loss
+        The loss function used for training.
+    optimizer : torch.optim.Optimizer
+        The optimization algorithm used to update model weights.
+    epoch : int
+        The current epoch number.
+
+    Returns
+    -------
+    dict
+        A dictionary containing training metrics such as loss and accuracy.
+
+    Notes
+    -----
+    This function iterates over the training data provided by train_loader, computes the loss for each batch,
+    backpropagates to update the model weights, and calculates training metrics. The function assumes that the model,
+    criterion, and optimizer are compatible with each other and the data provided. It also assumes that the model
+    has been appropriately moved to the specified device.
+    """
 
     score = {}
     score["balanced"], score["unbalanced"] = 0.00, 0.00
@@ -419,8 +488,11 @@ def model_initialization(args_in):
     args_model = loadarg(f"{args_in.model}/args.json")
     path_checkpoint = f"{args_in.model}/checkpoint/balanced.ckpt.pth.tar"
 
+    # Initialise model
     model, DataParallel, device, device_id, optimizer, criterion = initialise_model(
         args_in, args_model)
+
+    # Load model
     model, optimizer, data_state = load_model(
         path_checkpoint, model, optimizer, DataParallel=DataParallel, Filter_layers={})
     print("data_state", data_state)
