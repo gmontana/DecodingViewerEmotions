@@ -1,4 +1,35 @@
 
+"""
+dataset_predict.py
+
+Overview:
+This script defines the PredictFullVideoDataSet class for creating datasets specifically for prediction tasks involving
+entire videos. The class is designed to process videos by dividing them into segments or time windows, preparing video
+and audio data for each segment, and facilitating the generation of predictions for each segment. It supports multimodal
+inputs and can be used in conjunction with models to make and assemble predictions from all time windows of a video.
+
+Classes:
+- PredictFullVideoDataSet: A custom dataset class for handling entire videos and preparing data for prediction tasks.
+
+Functions:
+- GetDataSetPredict: Creates and returns a PredictFullVideoDataSet object for prediction tasks.
+- GetDataLoadersPredict: Creates and returns a DataLoader for the prediction dataset.
+
+Usage:
+The PredictFullVideoDataSet class is instantiated with specific parameters and an input file containing video data
+information. It is then used to create a DataLoader, which feeds data into a model in batches for making predictions.
+The class is particularly useful in scenarios where predictions need to be made for each segment of a video, such as
+in activity recognition or event detection tasks.
+
+Example:
+To use this script for making predictions on a video, you would typically do the following:
+1. Create an instance of PredictFullVideoDataSet with the appropriate input file and configuration.
+2. Create a DataLoader using the dataset instance.
+3. Iterate over the DataLoader in a loop, passing each batch of data to a model for prediction.
+4. Collect and assemble predictions from each segment as needed.
+"""
+
+
 from PIL import Image
 import os
 
