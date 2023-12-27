@@ -31,7 +31,23 @@ from lib.model.backbone import BackBone
 from lib.model.policy import gradient_policy
 
 
-def get_model(args_in, args):
+def initialise_model(args_in, args):
+    """
+    Initialize and return the model along with optimizer and criterion.
+
+    Parameters
+    ----------
+    args_in : dict
+        The input arguments from command line.
+    args : dict
+        The arguments loaded from the configuration file.
+
+    Returns
+    -------
+    tuple
+        A tuple containing the model, DataParallel, device, device_id, optimizer, and criterion.
+
+    """
 
     model_X = X_input(args["TSM"])
     model_BB = BackBone(args["TSM"])
@@ -53,7 +69,30 @@ def get_model(args_in, args):
     return model, DataParallel, device, device_id, optimizer, criterion
 
 
-def validate_external(args, args_data, model, device, criterion, mode_train_val="validation"):
+def validate_external_data(args, args_data, model, device, criterion, mode_train_val="validation"):
+    """
+    Validate the model using external data.
+
+    Parameters
+    ----------
+    args : dict
+        The arguments loaded from the configuration file.
+    args_data : dict
+        The arguments specific to the data.
+    model : torch.nn.Module
+        The model to validate.
+    device : torch.device
+        The device to run the model on.
+    criterion : torch.nn.modules.loss
+        The criterion to use for validation.
+    mode_train_val : str, optional
+        The mode of validation (default is "validation").
+
+    Returns
+    -------
+    None
+
+    """
     ValidDataSet = GetDataSet(args_data, mode_train_val=mode_train_val)
     ValidDataSet.unite_positive_negative()
     args["net_run_param"]["batch_size"] = 16
@@ -77,6 +116,31 @@ def validate_external(args, args_data, model, device, criterion, mode_train_val=
 
 
 def run_epoch(epoch, DataLoaders, model, device, optimizer, criterion, DataParallel=False):
+    """
+    Run one epoch of training and validation.
+
+    Parameters
+    ----------
+    epoch : int
+        The current epoch number.
+    DataLoaders : list
+        List containing data loaders for training, validation, and testing.
+    model : torch.nn.Module
+        The model to train and validate.
+    device : torch.device
+        The device to run the model on.
+    optimizer : torch.optim
+        The optimizer for training.
+    criterion : torch.nn.modules.loss
+        The criterion to use for training.
+    DataParallel : bool, optional
+        Flag to indicate if DataParallel is used (default is False).
+
+    Returns
+    -------
+    None
+
+    """
 
     global best_score,  test_score, history_score
 
@@ -126,6 +190,38 @@ def run_epoch(epoch, DataLoaders, model, device, optimizer, criterion, DataParal
 
 
 def validate(val_loader, model, device, criterion, epoch):
+    """
+    Validate the model for a single epoch using the given data loader.
+
+    Parameters
+    ----------
+    val_loader : DataLoader
+        The data loader for validation data.
+    model : torch.nn.Module
+        The model to be validated.
+    device : torch.device
+        The device on which to perform validation (CPU or GPU).
+    criterion : torch.nn.modules.loss
+        The loss function used for validation.
+    epoch : int
+        The current epoch number.
+
+    Returns
+    -------
+    dict
+        A dictionary containing validation scores and other metrics, including:
+        - 'balanced': The balanced accuracy score.
+        - 'unbalanced': The unbalanced accuracy score.
+    list
+        A list of predicted labels from the validation data.
+    list
+        A list of true labels from the validation data.
+
+    Notes
+    -----
+    This function assumes that the model output and labels are in a format compatible with the provided criterion and accuracy functions. It also updates the model to evaluation mode before running validation and tracks the loss and predictions for each batch in the data loader.
+
+    """
 
     score = {}
     score["balanced"], score["unbalanced"] = 0.00, 0.00
@@ -263,7 +359,7 @@ def main():
         args_model = loadarg(f"{args_in.model}/args.json")
         path_checkpoint = f"{args_in.model}/checkpoint/balanced.ckpt.pth.tar"
 
-        model, DataParallel, device, device_id, optimizer, criterion = get_model(
+        model, DataParallel, device, device_id, optimizer, criterion = initialise_model(
             args_in, args_model)
 
         (model, optimizer, data_state) = load_model(path_checkpoint,
@@ -280,15 +376,15 @@ def main():
         args["run_id"] = args_in.run_id
 
         if "file_val_list" in args_data["dataset"]:
-            validate_external(args, args_data, model, device,
-                              criterion, mode_train_val="validation")
+            validate_external_data(args, args_data, model, device,
+                                   criterion, mode_train_val="validation")
             if "file_test_list" in args_data["dataset"]:
-                validate_external(args, args_data, model,
-                                  device, criterion, mode_train_val="test")
+                validate_external_data(args, args_data, model,
+                                       device, criterion, mode_train_val="test")
         else:
 
-            validate_external(args, args_data, model, device,
-                              criterion, mode_train_val="predict")
+            validate_external_data(args, args_data, model, device,
+                                   criterion, mode_train_val="predict")
 
         exit()
 
@@ -317,7 +413,7 @@ def main():
     args["TSM"]["num_class"] = len(TrainDataSet.map_label)
     print("args.num_class", args["TSM"]["num_class"])
 
-    model, DataParallel, device, device_id, optimizer, criterion = get_model(
+    model, DataParallel, device, device_id, optimizer, criterion = initialise_model(
         args_in, args)
 
     cudnn.benchmark = True
