@@ -1,3 +1,29 @@
+
+"""
+predict_screen.py
+
+Overview:
+This script is a utility for automating the execution of predictions across multiple configurations or models. It is designed to run the 'predict.py' script with various settings, iterating over different data configurations, models, and modes. The script is particularly useful for scenarios where predictions need to be made and compared across a range of models or settings, such as in model evaluation or hyperparameter tuning tasks.
+
+The script sets up a series of configurations, each corresponding to a different model or setting, and executes the 'predict.py' script for each configuration. It handles different modes of operation, such as validation and testing, and allows for predictions to be run on specified CUDA devices.
+
+Functions:
+- mknewfolder: Creates a new folder if it doesn't exist.
+- main: Orchestrates the setup and execution of predictions for each configuration.
+
+Usage:
+The script is typically run from the command line with the necessary CUDA IDs specified. It then automatically runs the 'predict.py' script with the predefined configurations and modes, facilitating the batch execution of predictions across multiple settings.
+
+Example Command:
+python predict_screen.py --cuda_ids 0_1_2_3
+
+This command would run the script, executing predictions for each configuration in 'dirs_p1' on the specified CUDA devices. The script is useful in batch processing scenarios where multiple predictions need to be run and compared.
+
+Note:
+The specific configurations, models, and settings are defined within the script and may need to be adjusted based on the requirements of the prediction tasks or the available models. Ensure that the 'predict.py' script and the specified model directories are correctly set up and accessible.
+"""
+
+
 import subprocess
 import os
 import time
