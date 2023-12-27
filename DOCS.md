@@ -292,7 +292,7 @@ utils.py
     Input: Various inputs depending on the function, including model arguments, file paths, and dataset-specific information.
     Output: Various outputs including updated average values, saved/loaded configurations, directory paths, class counts, accuracy scores, and confusion matrices.
 
-# Training and prediction
+# Training 
 
 train.py
 
@@ -322,6 +322,8 @@ train.py
     validate_external: An external validation function for additional validation scenarios.
     Results Saving: The script saves training history and best scores in a JSON file.
 
+# Prediction
+`
 predict.py
 
     Input:
