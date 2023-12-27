@@ -1,9 +1,53 @@
+"""
+model.py
+
+Overview:
+This script defines the VCM class, which represents the complete model architecture combining various components
+like input processing, feature extraction, and output layers. The VCM class is typically used as the final model
+in a machine learning pipeline, integrating components from other modules like prepare_input and backbone.
+
+Classes:
+- VCM: The main class representing the complete model architecture.
+
+Usage:
+The VCM class is instantiated with specific parameters and component instances (like X_input and BackBone).
+It is then used in training or evaluation scripts to process input data, extract features, and produce outputs.
+"""
+
 
 import torch
 from torch import nn
 
 
 class VCM(torch.nn.Module):
+
+     """
+    VCM represents the complete model architecture integrating input processing,
+    feature extraction, and output layers for a machine learning task.
+
+    Parameters
+    ----------
+    param_TSM : dict
+        A dictionary containing parameters for the model, including details about the input, backbone, and other components.
+    nn_X_input : torch.nn.Module
+        An instance of the X_input class or similar, responsible for processing the input data.
+    nn_backbone : torch.nn.Module
+        An instance of the BackBone class or similar, responsible for feature extraction.
+
+    Attributes
+    ----------
+    model_layers : dict
+        A dictionary holding the different components of the model.
+    num_class : int
+        The number of classes for the output layer.
+    last_fc : torch.nn.Linear
+        The final fully connected layer producing the output.
+
+    Methods
+    -------
+    forward(x_video, x_audio)
+        Defines the forward pass of the model combining input processing, feature extraction, and output generation.
+    """
 
     def __init__(self, param_TSM, nn_X_input, nn_backbone):
         super(VCM, self).__init__()

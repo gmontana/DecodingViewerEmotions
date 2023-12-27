@@ -1,3 +1,25 @@
+
+"""
+prepare_input.py
+
+Overview:
+This script defines the X_input class, which is responsible for processing input data before it's fed into the model.
+It handles different types of inputs like video, audio, and potentially motion, and applies necessary transformations
+or preprocessing steps.
+
+Classes:
+- X_input: The main class for input data processing.
+
+Utility Functions:
+- vis_MDM2: Visualizes motion data.
+- vis_MDM: Another function for visualizing motion data.
+
+Usage:
+The X_input class is instantiated with specific parameters and then used in a model pipeline to process input data
+before it's passed to the feature extraction and classification components of the model.
+"""
+
+
 import torch
 from torch import nn
 from torch.nn.init import normal_, constant_
@@ -7,9 +29,29 @@ from lib.model.motion import MDFM
 
 
 def vis_MDM2(X,  save_folder, id):
+    """
+    Visualize and save motion data matrices (MDM) as images.
+
+    This function iterates through batches, modalities, and segments of the input tensor X, converting each segment
+    into an image and saving it to the specified folder. It's typically used for debugging or understanding the motion
+    data processed by the model.
+
+    Parameters
+    ----------
+    X : torch.Tensor
+        The input tensor containing motion data. Expected to have dimensions [batch, modality, segment, channel, height, width].
+    save_folder : str
+        The path to the folder where the images should be saved.
+    id : str
+        A base identifier for the saved images, which will be augmented with indices for each image.
+
+    Notes
+    -----
+    The function saves images with filenames based on the 'id' and indices for batch, modality, and segment.
+    Each image represents a segment of the motion data.
+    """
 
     [b, m, seg, c, h, w] = X.size()
-
     for jb in range(b):
         for jm in range(m):
             for jn in range(seg):
@@ -20,10 +62,33 @@ def vis_MDM2(X,  save_folder, id):
 
 
 def vis_MDM(X, X_MOT, save_folder, id):
+    """
+    Visualize and save motion data matrices (MDM) and corresponding original data as images.
+
+    This function iterates through batches, modalities, and segments of the input tensors X and X_MOT, converting each
+    segment into an image and saving it to the specified folder. It's typically used for debugging or understanding
+    the motion and original data processed by the model.
+
+    Parameters
+    ----------
+    X : torch.Tensor
+        The input tensor containing original data. Expected to have dimensions [batch, modality, segment, time, channel, height, width].
+    X_MOT : torch.Tensor
+        The input tensor containing motion data. Expected to have dimensions [batch, modality, segment, channel, height, width].
+    save_folder : str
+        The path to the folder where the images should be saved.
+    id : str
+        A base identifier for the saved images, which will be augmented with indices for each image.
+
+    Notes
+    -----
+    The function saves images with filenames based on the 'id' and indices for batch, modality, and segment.
+    Each image represents a segment of the original or motion data. The function saves multiple versions of the motion data
+    and one version of the original data for each segment.
+    """
 
     [b, m, n, t, c, h, w] = X.size()
     [b, m, n, c, h, w] = X_MOT.size()
-
     for jb in range(b):
         for jm in range(m):
             for jn in range(n):
@@ -43,6 +108,32 @@ def vis_MDM(X, X_MOT, save_folder, id):
 
 
 class X_input(torch.nn.Module):
+
+    """
+    X_input is responsible for processing and preparing input data for the model. It handles different types of inputs
+    like video, audio, and motion, applying necessary transformations or preprocessing steps.
+
+    Parameters
+    ----------
+    param_TSM : dict
+        A dictionary containing parameters for the model, specifically related to how input data should be handled.
+
+    Attributes
+    ----------
+    input_mode : int
+        Specifies how different input types should be combined or processed.
+    n_video_segments : int
+        The number of segments for video input.
+    n_audio_segments : int
+        The number of segments for audio input.
+    n_motion_segments : int
+        The number of segments for motion input, if applicable.
+
+    Methods
+    -------
+    forward(x_video, x_audio)
+        Defines the forward pass of the input processing, combining and transforming video, audio, and motion inputs.
+    """
 
     def __init__(self, param_TSM):
         super(X_input, self).__init__()
