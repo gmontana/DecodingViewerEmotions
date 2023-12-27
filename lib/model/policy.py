@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torchvision
 
 
-def freeze_layers(net, FilterPos, DataParallel = False):
+def freeze_layers(net, FilterPos, DataParallel=False):
     if DataParallel:
         for param_name, param in net.module.named_parameters():
             param.requires_grad = False
@@ -22,7 +22,7 @@ def freeze_layers(net, FilterPos, DataParallel = False):
                     param.requires_grad = True
 
 
-def unfreeze_layers(net, FilterNeg, DataParallel = False):
+def unfreeze_layers(net, FilterNeg, DataParallel=False):
     if DataParallel:
         for param_name, param in net.module.named_parameters():
             param.requires_grad = True
@@ -37,22 +37,23 @@ def unfreeze_layers(net, FilterNeg, DataParallel = False):
                     print("unfreeze_layers ", layer_id)
                     param.requires_grad = False
 
-def count_free_layers(net,DataParallel = False):
+
+def count_free_layers(net, DataParallel=False):
 
     if DataParallel:
-        count_free, count_freeze = 0 , 0
+        count_free, count_freeze = 0, 0
         for param in net.module.parameters():
             if param.requires_grad:
-                count_free +=1
+                count_free += 1
             else:
-                count_freeze +=1
+                count_freeze += 1
     else:
-        count_free, count_freeze = 0 , 0
+        count_free, count_freeze = 0, 0
         for param in net.parameters():
             if param.requires_grad:
-                count_free +=1
+                count_free += 1
             else:
-                count_freeze +=1
+                count_freeze += 1
 
         if count_freeze < 10:
             for name, param in net.named_parameters():
@@ -63,7 +64,7 @@ def count_free_layers(net,DataParallel = False):
 
 def freeze_policy(args, net, epoch, optimizer, DataParallel=False):
     FilterFreezeA, FilterFreezeB = {}, {}
-    for i in range (0,len(args.net_optim_policy["freeze_layers"]),2):
+    for i in range(0, len(args.net_optim_policy["freeze_layers"]), 2):
         layer_id = args.net_optim_policy["freeze_layers"][i]
         epoch_i = args.net_optim_policy["freeze_layers"][i+1]
 
@@ -83,18 +84,44 @@ def freeze_policy(args, net, epoch, optimizer, DataParallel=False):
         unfreeze_layers(net, FilterFreezeB, DataParallel=DataParallel)
 
 
-
-
 def gradient_policy(args, epoch, optimizer):
-    #exit()
+    """
+    Adjust the learning rate of the optimizer based on the epoch according to a predefined schedule.
+
+    This function assumes that the learning rate decay schedule is provided in the 'lr_decay' key of the
+    'net_optim_param' dictionary within the 'args'. The 'lr_decay' list is expected to contain pairs of values,
+    where each pair consists of a learning rate multiplier and the epoch number at which this multiplier should be applied.
+
+    Parameters
+    ----------
+    args : dict
+        The script arguments or other configuration, specifically containing the 'net_optim_param' dictionary
+        with 'lr' for the initial learning rate and 'lr_decay' for the decay schedule.
+    epoch : int
+        The current epoch number.
+    optimizer : torch.optim.Optimizer
+        The optimizer being used in the training, which will have its learning rate adjusted.
+
+    Notes
+    -----
+    The 'lr_decay' list is expected to be in the format: [multiplier1, epoch1, multiplier2, epoch2, ...].
+    For example, [0.1, 30, 0.01, 50] means reduce the learning rate to 0.1x at epoch 30 and then to 0.01x at epoch 50.
+    This function modifies the learning rate of the last parameter group of the optimizer.
+    """
+    # Extract learning rate decay parameters
     lr_decay = args["net_optim_param"]["lr_decay"]
     print("lr_decay", lr_decay, len(lr_decay))
-    for i in range(0,len(lr_decay),2):
 
+    # Loop through the decay schedule and adjust learning rate if necessary
+    for i in range(0, len(lr_decay), 2):
+        # Check if the current epoch has reached the epoch for the next decay step
         if epoch >= lr_decay[i+1]:
-            optimizer.param_groups[-1]['lr'] = lr_decay[i] * args["net_optim_param"]["lr"]
-    print("run_epoch lr", optimizer.param_groups[-1]['lr'], "epoch:", epoch)
+            # Adjust the learning rate
+            optimizer.param_groups[-1]['lr'] = lr_decay[i] * \
+                args["net_optim_param"]["lr"]
 
+    # Print the current learning rate and epoch for logging or debugging
+    print("run_epoch lr", optimizer.param_groups[-1]['lr'], "epoch:", epoch)
 
 
 def get_optim_policy(args, net, epoch, optimizer, DataParallel=False):
@@ -108,31 +135,33 @@ def get_optim_policy(args, net, epoch, optimizer, DataParallel=False):
     if args.net_optim_policy["freeze_BLOCK_layers_soft"] < epoch:
         freeze_BLOCK_layers_soft(net, epoch, DataParallel)
 
-    count_free, count_freeze = count_free_layers(net, DataParallel=DataParallel)
+    count_free, count_freeze = count_free_layers(
+        net, DataParallel=DataParallel)
     print("count_free_layers, count_freeze_layers", count_free, count_freeze)
 
     print("args.net_optim_policy", args.net_optim_policy)
     print("run_epoch lr", optimizer.param_groups[-1]['lr'], "epoch:", epoch)
 
 
-
-
-
-def freeze_BN_layers(net,  DataParallel = False):
+def freeze_BN_layers(net,  DataParallel=False):
 
     print("freeze_BN_layers")
 
     if DataParallel:
         for param_name, param in net.module.named_parameters():
-            if "norm" in param_name: param.requires_grad = False
-            if "bn" in param_name: param.requires_grad = False
+            if "norm" in param_name:
+                param.requires_grad = False
+            if "bn" in param_name:
+                param.requires_grad = False
     else:
         for param_name, param in net.named_parameters():
-            if "norm"  in param_name: param.requires_grad = False
-            if "bn"  in param_name: param.requires_grad = False
+            if "norm" in param_name:
+                param.requires_grad = False
+            if "bn" in param_name:
+                param.requires_grad = False
 
 
-def freeze_BLOCK_layers_hard(net, epoch,  DataParallel = False):
+def freeze_BLOCK_layers_hard(net, epoch,  DataParallel=False):
 
     print("freeze_BLOCK_layers_hard", epoch)
 
@@ -154,7 +183,7 @@ def freeze_BLOCK_layers_hard(net, epoch,  DataParallel = False):
                         param.requires_grad = True
 
 
-def freeze_BLOCK_layers_soft(net, epoch,  DataParallel = False):
+def freeze_BLOCK_layers_soft(net, epoch,  DataParallel=False):
 
     print("freeze_BLOCK_layers_soft", epoch)
 
@@ -163,19 +192,18 @@ def freeze_BLOCK_layers_soft(net, epoch,  DataParallel = False):
             for s in range(4):
                 if epoch % 4 == s:
                     if f"layer{s + 1}" in param_name:
-                        #print("freeze_BLOCK_layers_soft", param_name)
+                        # print("freeze_BLOCK_layers_soft", param_name)
                         param.requires_grad = False
     else:
         for param_name, param in net.named_parameters():
             for s in range(4):
                 if epoch % 4 == s:
                     if f"layer{s + 1}" in param_name:
-                        #print("param_name", param_name)
+                        # print("param_name", param_name)
                         param.requires_grad = False
 
 
-
-def restart_fc_layers(net, DataParallel = False):
+def restart_fc_layers(net, DataParallel=False):
 
     print("restart_fc_layers")
 
@@ -205,9 +233,4 @@ def restart_fc_layers(net, DataParallel = False):
 
 if __name__ == '__main__':
 
-
     print('Test passed.')
-
-
-
-
