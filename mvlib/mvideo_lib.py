@@ -494,6 +494,7 @@ class VideoDB:
         self.fileDescriptionVideos = fileDescriptionVideos
         self.fileIndividualProfiles = fileIndividualProfiles
         self.dirVideos = dirVideos
+        self.positive_ID_filtr = {}
 
 
     def add_Emotions(self):
