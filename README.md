@@ -41,7 +41,7 @@ Given the dataset's substantial volume, both video excerpts and model weights ar
 
 The dataset leverages System1's proprietary "Test Your Ad®" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
 
-### Using the Code
+## Using the Code
 
 The included Python code, leveraging the PyTorch framework, is well-documented and user-friendly. It allows for the reproduction of the paper's experiments or adaptation for your datasets.
 
@@ -49,7 +49,7 @@ In addition to training the TSM-augmented architectures described in our paper, 
 
 Should you encounter issues or have questions, please open a GitHub issue on this repository.
 
-## License
+### License
 
 The TSAM software and associated documentation provided in this repository are made available under a custom license that permits use solely for academic research and non-commercial evaluation. Commercial use, clinical use, and redistribution under terms not specified within this license are strictly prohibited without express written permission from the University of Warwick.
 
