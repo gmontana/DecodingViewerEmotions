@@ -1,6 +1,8 @@
 # DecodingViewerEmotions
 
-This repository provides access to code and data to reproduce the results from the paper "Predicting Ad Effectiveness from Short Video Excerpts".
+This repository provides access to code and data to reproduce the results from the paper "Decoding Viewer Emotions in Video Ads: Predictive
+Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando
+Wood and Giovanni Montana. 
 
 ## Paper Summary
 
