@@ -37,6 +37,12 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 
 Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Professor Giovanni Montana (University of Warwick, UK) at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
 
+### Data Description
+The data can be downloaded as three ZIP files; they are DataAdcumen.zip, ALL_frames.zip, and audios.zip.
+- **The DataAdcumen.zip** contains the emotions annotations in CSV files, data splits for training, validation, testing, and VDB.pickle file, which is the pre-build data for data loading to train and test the deep learning model.
+- **The ALL_frames.zip** contains 30,751 subfolders named after the advertisement videos. Each subfolder includes the frames in JPG format, which are converted from MP4 videos at fps = 10.
+- **The audios.zip** contains 30,751 audios of the advertisement videos in WAV format.
+
 ### Dataset Access Disclaimer
 
 The dataset leverages System1's proprietary "Test Your Ad®" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
