@@ -28,7 +28,6 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 | Disgust    | 3,061 | 2,564 | 254        | 243  |
 | Fear       | 3,166 | 2,549 | 317        | 300  |
 | Happiness  | 3,577 | 2,918 | 383        | 276  |
-| Natural    | 3,493 | 2,771 | 398        | 322  |
 | Sadness    | 3,576 | 2,886 | 346        | 344  |
 | Surprise   | 3,553 | 2,841 | 387        | 325  |
 | **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
