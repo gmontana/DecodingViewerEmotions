@@ -13,7 +13,7 @@ Our study introduces a novel deep learning framework capable of predicting viewe
 - **TSAM Architecture Development**: We developed the Temporal Shift Augmented Module (TSAM) architecture, a convolutional neural network model that integrates both video frames and audio signals to classify short video clips based on their emotional content.
 - **Data Preparation and Model Training**: Utilizing the detected emotional jumps, we prepared a dataset of 5-second clips, each labeled with the corresponding emotion. This dataset was then used to train, validate, and test the TSAM model, demonstrating its ability to accurately classify the emotional content of unseen video clips.
 
-### Dataset Breakdown and Availability
+### Dataset Breakdown 
 The study utilized a total of 26,637 5-second video clips, divided into training, validation, and test sets as follows:
 
 | Emotion    | Total | Train | Validation | Test |
@@ -28,6 +28,7 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 | Surprise   | 3,553 | 2,841 | 387        | 325  |
 | **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
 
+### Dataset and Network's weights Availabilty  
 Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Giovanni Montana at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
 
 ## Repository Contents
