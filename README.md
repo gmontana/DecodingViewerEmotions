@@ -51,8 +51,6 @@ Should you encounter issues or have questions, please open a GitHub issue on thi
 
 ### License
 
-The TSAM software and associated documentation provided in this repository are made available under a custom license that permits use solely for academic research and non-commercial evaluation. Commercial use, clinical use, and redistribution under terms not specified within this license are strictly prohibited without express written permission from the University of Warwick.
-
-For the full license terms, please refer to the [LICENCE](LICENCE) file included in this repository. For any inquiries regarding permissible use or for seeking permissions beyond the scope of this license, please contact Warwick Ventures at ventures@warwick.ac.uk.
+For the full license terms, please refer to the [LICENCE](LICENCE) file included in this repository. The TSAM software and associated documentation provided in this repository are made available under a custom license that permits use solely for academic research and non-commercial evaluation. Commercial use, clinical use, and redistribution under terms not specified within this license are strictly prohibited without express written permission from the University of Warwick. For any inquiries regarding permissible use or for seeking permissions beyond the scope of this license, please contact Warwick Ventures at ventures@warwick.ac.uk.
 
 
