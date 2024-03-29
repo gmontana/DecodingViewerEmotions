@@ -13,7 +13,7 @@ Our study introduces a novel deep learning framework capable of predicting viewe
 - **TSAM Architecture Development**: We developed the Temporal Shift Augmented Module (TSAM) architecture, a convolutional neural network model that integrates both video frames and audio signals to classify short video clips based on their emotional content.
 - **Data Preparation and Model Training**: Utilizing the detected emotional jumps, we prepared a dataset of 5-second clips, each labeled with the corresponding emotion. This dataset was then used to train, validate, and test the TSAM model, demonstrating its ability to accurately classify the emotional content of unseen video clips.
 
-### Dataset Breakdown 
+## Dataset Breakdown 
 
 The study utilized a total of 26,637 5-second video clips, divided into training, validation, and test sets as follows:
 
@@ -29,11 +29,11 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 | Surprise   | 3,553 | 2,841 | 387        | 325  |
 | **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
 
-### Data Availabilty  
+## Data Availabilty  
 
 Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Professor Giovanni Montana (University of Warwick, UK) at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
 
-## Dataset Access Disclaimer
+### Dataset Access Disclaimer
 
 The dataset leverages System1's proprietary "Test Your Ad®" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
 
@@ -43,8 +43,7 @@ The dataset leverages System1's proprietary "Test Your Ad®" tool for public, ed
 - A dataset consisting of 5-second video excerpts, totaling over 30,000 clips, utilized for training, validation, and testing, annotated for eight distinct emotional categories and their temporal onset.
 - Pre-trained model weights facilitating the reproduction of reported experimental outcomes.
 
-
-## Using the Code
+### Using the Code
 
 The included Python code, leveraging the PyTorch framework, is well-documented and user-friendly. It allows for the reproduction of the paper's experiments or adaptation for your datasets.
 
