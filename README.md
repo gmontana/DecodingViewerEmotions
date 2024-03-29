@@ -51,3 +51,13 @@ The included Python code, leveraging the PyTorch framework, is well-documented a
 In addition to training the TSM-augmented architectures described in our paper, this code also supports inference tasks.
 
 Should you encounter issues or have questions, please open a GitHub issue on this repository.
+
+## License
+
+The TSAM software and associated documentation provided in this repository are made available under a custom license that permits use solely for academic research and non-commercial evaluation. Commercial use, clinical use, and redistribution under terms not specified within this license are strictly prohibited without express written permission from the University of Warwick.
+
+For the full license terms, please refer to the [LICENSE](LICENSE) file included in this repository.
+
+For any inquiries regarding permissible use or for seeking permissions beyond the scope of this license, please contact Warwick Ventures at ventures@warwick.ac.uk.
+
+
