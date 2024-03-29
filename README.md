@@ -1,7 +1,11 @@
 # Decoding Viewer Emotions in Video Ads
 ![TSAM Architecture](TSAM.png)
 
-This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana.
+This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana. We provide access to:
+
+- Python code for training the Temporal Shift Module (TSM) augmented neural network models detailed in the paper and for inference. 
+- A dataset consisting of 5-second video excerpts, totaling over 30,000 clips, utilized for training, validation, and testing, annotated for eight distinct emotional categories and their temporal onset.
+- Pre-trained model weights facilitating the reproduction of reported experimental outcomes.
 
 ## Paper Summary
 
@@ -36,12 +40,6 @@ Given the dataset's substantial volume, both video excerpts and model weights ar
 ### Dataset Access Disclaimer
 
 The dataset leverages System1's proprietary "Test Your Ad®" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
-
-## Repository Contents
-
-- Python code for training the Temporal Shift Module (TSM) augmented neural network models detailed in the paper.
-- A dataset consisting of 5-second video excerpts, totaling over 30,000 clips, utilized for training, validation, and testing, annotated for eight distinct emotional categories and their temporal onset.
-- Pre-trained model weights facilitating the reproduction of reported experimental outcomes.
 
 ### Using the Code
 
