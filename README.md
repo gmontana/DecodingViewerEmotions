@@ -1,33 +1,27 @@
-# DecodingViewerEmotions
+# Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning
 
-This repository provides access to code and data to reproduce the results from the paper "Decoding Viewer Emotions in Video Ads: Predictive
-Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando
-Wood and Giovanni Montana. 
+This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana.
 
 ## Paper Summary
 
-This paper presents a deep learning approach to predict the effectiveness of video advertisements from short 5-second excerpts. We trained convolutional neural networks on a dataset of over 30,000 short video clips, using effectiveness ratings gathered from real consumer panels as the prediction targets.
-
-Our models are able to predict ad effectiveness from these short excerpts with strong accuracy. This demonstrates the potential to quickly and automatically assess ad creative, enabling faster and lower-cost ad testing. The paper provides details on the model architectures, training procedures, and experimental results.
+Our study introduces a novel deep learning framework capable of predicting viewers' emotional reactions to video advertisements using short, 5-second excerpts. Leveraging a dataset derived from System1’s proprietary methodologies, encompassing over 30,000 video ads annotated by around 75 viewers each, our methodology integrates convolutional neural networks to process both video and audio data, achieving notable accuracy in identifying salient emotional excerpts.
 
 ## Repository Contents
 
-To enable reproducible research, this repository provides:
+- Python code for training the Temporal Shift Module (TSM) augmented neural network models detailed in the paper.
+- A dataset consisting of 5-second video excerpts, totaling over 30,000 clips, utilized for training, validation, and testing, annotated for eight distinct emotional categories and their temporal onset.
+- Pre-trained model weights facilitating the reproduction of reported experimental outcomes.
 
-- Python code to train the neural network models described in the paper
-- The dataset of 5-second video excerpts used for model training, validation, and testing (over 30,000 clips in total)
-- Trained model weights that reproduce the experimental results reported in the paper
-
-Due to the large size of the datasets, the video clips and model weights are hosted separately by the University of Warwick. To request access for research purposes, please email [g.montana@warwick.ac.uk](mailto:g.montana@warwick.ac.uk) with your name and institutional affiliation.
+Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Giovanni Montana at g.montana@warwick.ac.uk with your affiliation details.
 
 ## Dataset Access Disclaimer
 
-Please note that the excerpts displayed here are sourced from System1's proprietary rating tool, "System1 Test Your Ad®". These excerpts are provided for public access for educational and illustrative purposes only. While these excerpts have been derived from our tool, the advertisements from which they originate are not owned by System1. As such, these advertisements or the excerpts cannot be distributed or used beyond the context of this study without the express consent of their respective owners. By accessing these excerpts, you acknowledge and agree to these terms.
+The dataset leverages System1's proprietary "Test Your Ad®" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
 
 ## Using the Code
 
-The Python code included here is documented and should be self-explanatory to run. It uses the PyTorch deep learning framework. See the code files for details on the required dependencies.
+The included Python code, leveraging the PyTorch framework, is well-documented and user-friendly. It allows for the reproduction of the paper's experiments or adaptation for your datasets.
 
-With the video clip data and pre-trained model weights, you can use the code to reproduce the experiments described in the paper, or adapt it to train models on your own data.
+In addition to training the TSM-augmented architectures described in our paper, this code also supports inference tasks.
 
-Feel free to submit a GitHub issue if you have any questions!
+Should you encounter issues or have questions, please open a GitHub issue on this repository.
