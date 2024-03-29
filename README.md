@@ -1,72 +1,31 @@
-# Adcumen project
+# DecodingViewerEmotions
 
-Scripts for training/prediction and compute descriptive statistics of adcumen data.
+This repository provides access to code and data to reproduce the results from the paper "Predicting Ad Effectiveness from Short Video Excerpts".
 
-## Preprocessing of Adcumen data 
+## Paper Summary
 
-This repo contains scripts to parse original adcumen data:
+This paper presents a deep learning approach to predict the effectiveness of video advertisements from short 5-second excerpts. We trained convolutional neural networks on a dataset of over 30,000 short video clips, using effectiveness ratings gathered from real consumer panels as the prediction targets.
 
-- create_data_base.py: parse original data from "DataAdcumen/advert_respondent_data.csv" and "DataAdcumen/DatasetAdcumenStarR.csv 
+Our models are able to predict ad effectiveness from these short excerpts with strong accuracy. This demonstrates the potential to quickly and automatically assess ad creative, enabling faster and lower-cost ad testing. The paper provides details on the model architectures, training procedures, and experimental results.
 
-- load_data_base.py:  convert videos from the database into frame and audio  (needs output from create_data_base.py) 
+## Repository Contents
 
-- plots.py: creates all "Descriptive statistics" used in the manuscript (needs output from create_data_base.py) 
+To enable reproducible research, this repository provides:
 
-All scripts need configuration from config/adcumen**.json to specify paths to input and output files, also parametes like "jump": 0.5 and "clip_length": 5; which means top 0.5 percentile and clip duration 5 seconds.
+- Python code to train the neural network models described in the paper
+- The dataset of 5-second video excerpts used for model training, validation, and testing (over 30,000 clips in total)
+- Trained model weights that reproduce the experimental results reported in the paper
 
-## Configuration    
+Due to the large size of the datasets, the video clips and model weights are hosted separately by the University of Warwick. To request access for research purposes, please email [g.montana@warwick.ac.uk](mailto:g.montana@warwick.ac.uk) with your name and institutional affiliation.
 
-Configuration file: config/adcumen**.json specify:
+## Dataset Access Disclaimer
 
-- "dataset": paths to data
+Please note that the excerpts displayed here are sourced from System1's proprietary rating tool, "System1 Test Your Ad®". These excerpts are provided for public access for educational and illustrative purposes only. While these excerpts have been derived from our tool, the advertisements from which they originate are not owned by System1. As such, these advertisements or the excerpts cannot be distributed or used beyond the context of this study without the express consent of their respective owners. By accessing these excerpts, you acknowledge and agree to these terms.
 
-- "emotion_jumps": parameters of emotion jumps
+## Using the Code
 
-- "TSM": parameters of video classification model (to train/predict)
+The Python code included here is documented and should be self-explanatory to run. It uses the PyTorch deep learning framework. See the code files for details on the required dependencies.
 
-- "root_folder": paths to save trained model weights and parameters
+With the video clip data and pre-trained model weights, you can use the code to reproduce the experiments described in the paper, or adapt it to train models on your own data.
 
-## Training
-
-- train.py: to train video classification model or to validate video classification model (if option --model <path_to_model> is specified)
-
-The training function is also called by the screen.py script which is used to set up different experiments.
-
-## Prediction
-
-- predict.py: to make full video prediction (whether video has at least one emotion jump of a given kind )
-
-An example of using predict.py:
-`` 
-python3 predict.py --data config/adcumen1_ortigia.json  --id f16_BG0_RGB_audio_16_INET21K --type test --model logs/screen_multiclass_may/ad_timm_16f_j05_BG0/0_1_2_3_4_5_6_7_8_0.5_0.5_0.1_1_resnet50_timm_16_0_1_adcumen
-``
-
-where the parameters are:
-
-    --data (config/adcumen1_ortigia.json): This parameter specifies the path to the JSON configuration file that contains settings or data definitions needed for predictions. This file typically includes paths to datasets, preprocessing details, and other relevant information required to set up the data for prediction.
-
-    --id (f16_BG0_RGB_audio_16_INET21K): This is an identifier for the prediction task. It might be used to name output files or directories, making it easier to track and organize results, especially when making predictions on different sets or types of data.
-
-    --type (test): This parameter specifies the mode or type of prediction being run. Common types might include test, validation, or predict. Each type might correspond to different data sets or different modes of operation in the script. For example, test might use a held-out portion of the data to evaluate the model's performance.
-
-    --model (logs/screen_multiclass_may/ad_timm_16f_j05_BG0/0_1_2_3_4_5_6_7_8_0.5_0.5_0.1_1_resnet50_timm_16_0_1_adcumen): This parameter specifies the path to the directory containing the trained model and its associated files, like weights (checkpoint) and configuration (args.json). The script will load this model for making predictions. The path typically includes the directory where the model is saved, and it's essential that this directory contains all necessary files for loading the model.
-
-- predict_annotate_video.py: to make predictions at the full video level
-
-
-## Automaation
-
-- screen.py: automate the training
-
-An example is
-
-```
-python3 screen.py --config config/adcumen1_ortigia.json --cuda_ids 0_1_2_3
-```
-
-this would screen jumps 0.1 0.5 1 2 3 percentiles
-
-Results would be stored in folder:  logs/screen_23_01_2023/results
-
-
-- screen_predict.py: automate the predictions
+Feel free to submit a GitHub issue if you have any questions!
