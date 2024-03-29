@@ -31,7 +31,7 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 
 ### Data Availabilty  
 
-Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Giovanni Montana at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
+Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Professor Giovanni Montana (University of Warwick, UK) at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
 
 ## Dataset Access Disclaimer
 
