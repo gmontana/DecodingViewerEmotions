@@ -33,16 +33,37 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 | Surprise   | 3,553 | 2,841 | 387        | 325  |
 | **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
 
+## Data Description
+
+The dataset comprises three downloadable ZIP files: `DataAdcumen.zip`, `ALL_frames.zip`, and `audios.zip`, each serving a specific purpose in the emotion recognition study from advertisement videos.
+
+### `DataAdcumen.zip`
+
+This ZIP file is essential for accessing emotion annotations and data splits. It contains:
+
+- **CSV Files for Emotion Annotations**: These files document viewer-reported emotions across different granularity levels:
+  - `DatasetAdcumenStarR.csv`: Shows the emotion reaction ratio for each video, offering an overview of aggregated viewer responses.
+  - `DatasetAdcumenSBS.csv`: Breaks down the emotion reaction ratio for every second of each video, providing detailed temporal insights into viewer emotions.
+  - `advert_respondent_data.csv`: Contains detailed records of every emotion reaction, including timestamp, `emotion_id`, and `advert_id`, for a comprehensive analysis.
+- **Data Splits**: Includes predefined splits for training, validation, and testing, crucial for developing and evaluating the deep learning model.
+- **VDB.pickle**: A pre-built data file designed for efficient data loading during model training and testing phases.
+
+### `ALL_frames.zip`
+
+This archive houses the visual data:
+
+- Contains 30,751 subfolders, each named after its corresponding advertisement video, ensuring organized data access.
+- Subfolders include frames in JPG format, extracted from MP4 videos at a frame rate of 10 fps, facilitating visual data analysis without the need to process entire videos.
+
+### `audios.zip`
+
+This ZIP file encompasses the audio component of the dataset:
+
+- Features 30,751 audio files in WAV format, each corresponding to an advertisement video, allowing for auditory data analysis alongside visual inputs.
+
 ## Data Availabilty  
 
 Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Professor Giovanni Montana (University of Warwick, UK) at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
-
-### Data Description
-The data can be downloaded as three ZIP files; they are DataAdcumen.zip, ALL_frames.zip, and audios.zip.
-- **The DataAdcumen.zip** contains the emotions annotations in CSV files, data splits for training, validation, testing, and VDB.pickle file, which is the pre-build data for data loading to train and test the deep learning model.
-- These CSV files recorded the emotion details in three levels. The DatasetAdcumenStarR.csv includes the emotion reaction ratio for each video. The DatasetAdcumenSBS.csv includes the emotion reaction ratio for every second of each video. The advert_respondent_data.csv contains the information of every emotion reaction, including timestamp, emotion_id, and advert_id.
-- **The ALL_frames.zip** contains 30,751 subfolders named after the advertisement videos. Each subfolder includes the frames in JPG format, which are converted from MP4 videos at fps = 10.
-- **The audios.zip** contains 30,751 audios of the advertisement videos in WAV format.
 
 ### Dataset Access Disclaimer
 
