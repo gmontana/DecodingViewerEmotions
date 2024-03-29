@@ -1,2 +1,5 @@
-The files are data splits.
-The annotations can be downloaded from: 
+training_0 contains the name list of advertisement videos for training the model.
+
+valid_0_p1 contains the name list of advertisement videos for validation during training.
+
+valid_0_p2 contains the name list of advertisement videos for testing after training.
