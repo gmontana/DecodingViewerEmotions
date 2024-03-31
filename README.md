@@ -6,6 +6,8 @@
   <img width="450px" src="TSAM.png" alt="TSAM" />
 </p>
 
+## Overview 
+
 This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana. We provide access to:
 
 - Python code for training the Temporal Shift Module (TSM) augmented neural network models detailed in the paper and for inference. 
@@ -36,7 +38,6 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 | Sadness    | 3,576 | 2,886 | 346        | 344  |
 | Surprise   | 3,553 | 2,841 | 387        | 325  |
 | **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
-
 
 ## Data Availabilty  
 
