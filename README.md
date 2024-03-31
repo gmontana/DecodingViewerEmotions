@@ -1,6 +1,4 @@
-<p align="center">
-  <h1>Decoding Viewer Emotions in Video Ads</h1>
-</p>
+<h1 align="center" style="font-size: 36px;">Decoding Viewer Emotions in Video Ads</h1>
 
 <p align="center">
   <img width="650px" src="example.png" alt="example" />
