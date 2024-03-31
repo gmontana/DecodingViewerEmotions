@@ -1,8 +1,10 @@
-<h1 align="center" style="font-size: 36px;">Decoding Viewer Emotions in Video Ads</h1>
+<div style="text-align: center; font-size: 36px;">
+  Decoding Viewer Emotions in Video Ads
+</div>
 
-<p align="center">
+<div style="text-align: center;">
   <img width="650px" src="example.png" alt="example" />
-</p>
+</div>
 
 ## Overview 
 
