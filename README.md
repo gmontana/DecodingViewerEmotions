@@ -1,5 +1,10 @@
-# Decoding Viewer Emotions in Video Ads
-![TSAM Architecture](TSAM.png)
+<p align="center">
+  <strong>Decoding Viewer Emotions in Video Ads</strong>
+</p>
+
+<p align="center">
+  <img width="300px" src="TMAS.png" alt="TSAM" />
+</p>
 
 This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana. We provide access to:
 
