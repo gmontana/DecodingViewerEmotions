@@ -7,11 +7,13 @@
 
 ## Overview 
 
-This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana. We provide access to:
+This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana. 
 
-- Python code for training the Temporal Shift Module (TSM) augmented neural network models detailed in the paper and for inference. 
-- A dataset consisting of 5-second video excerpts, totaling over 30,000 clips, utilized for training, validation, and testing, annotated for eight distinct emotional categories and their temporal onset.
+We provide access to:
+
+- Python code for training the Temporal Shift Augmented Module (TSAM) architecture detailed in the paper and for inference.
 - Pre-trained model weights facilitating the reproduction of reported experimental outcomes.
+- The dataset used in the paper consisting of 5-second video excerpts utilized for training, validation, and testing, annotated for seven distinct emotional categories and their temporal onset. 
 
 ## Paper Summary
 
