@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>Decoding Viewer Emotions in Video Ads</strong>
+  <h1>Decoding Viewer Emotions in Video Ads</h1>
 </p>
 
 <p align="center">
