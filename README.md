@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img width="450px" src="TSAM.png" alt="TSAM" />
+  <img width="450px" src="example" alt="example" />
 </p>
 
 ## Overview 
@@ -23,6 +23,10 @@ Our study introduces a novel deep learning framework capable of predicting viewe
 - **Emotional Jumps Detection**: From the initial pool of video ads, we identified significant emotional transitions, termed 'emotional jumps', utilizing viewer annotations to pinpoint moments of pronounced emotional shifts.
 - **TSAM Architecture Development**: We developed the Temporal Shift Augmented Module (TSAM) architecture, a convolutional neural network model that integrates both video frames and audio signals to classify short video clips based on their emotional content.
 - **Data Preparation and Model Training**: Utilizing the detected emotional jumps, we prepared a dataset of 5-second clips, each labeled with the corresponding emotion. This dataset was then used to train, validate, and test the TSAM model, demonstrating its ability to accurately classify the emotional content of unseen video clips.
+
+<p align="center">
+  <img width="450px" src="TSAM.png" alt="TSAM" />
+</p>
 
 ## Dataset Breakdown 
 
