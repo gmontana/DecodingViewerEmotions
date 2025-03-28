@@ -7,7 +7,8 @@
 
 ## Overview 
 
-This repository offers access to the code and data necessary to replicate the findings of "Decoding Viewer Emotions in Video Ads: Predictive Insights through Deep Learning" by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana. 
+This repository contains the code and data to replicate the findings from [“Decoding Viewer Emotions in Video Ads”](https://www.nature.com/articles/s41598-024-76968-9) by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana, published in *Nature Scientific Reports*.
+
 
 We provide access to:
 
