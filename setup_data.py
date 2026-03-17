@@ -289,193 +289,131 @@ def build_vdb(splits, output_path, clip_length=5):
         print(f"  {name} (eid={eid}): {label_counts.get(eid, 0)}")
 
 
+def extract_archive(archive_path, output_dir):
+    """Extract a tar or zip archive (HuggingFace .tar files may actually be zips)."""
+    os.makedirs(output_dir, exist_ok=True)
+    if zipfile.is_zipfile(archive_path):
+        with zipfile.ZipFile(archive_path, 'r') as zf:
+            zf.extractall(output_dir)
+    else:
+        with tarfile.open(archive_path, 'r') as tf:
+            tf.extractall(output_dir)
+
+
+def find_file(search_dir, pattern):
+    """Find a file matching pattern in search_dir recursively."""
+    for root, dirs, files in os.walk(search_dir):
+        for f in files:
+            if pattern(f):
+                return os.path.join(root, f)
+    return None
+
+
 def extract_weights(input_dir, repo_root):
-    """Extract backbone and TSAM weights from tar files."""
+    """Extract backbone and TSAM weights from archive files."""
+    import shutil
 
     # Backbone weights
-    backbone_tar = os.path.join(input_dir, "backbone_weights.tar")
+    backbone_archive = os.path.join(input_dir, "backbone_weights.tar")
     backbone_dir = os.path.join(repo_root, "net_weigths")
-    if os.path.exists(backbone_tar):
-        os.makedirs(backbone_dir, exist_ok=True)
-        print(f"Extracting backbone weights...")
-        with tarfile.open(backbone_tar, 'r') as tf:
-            tf.extractall(backbone_dir)
-        # Find the .pth file and ensure it's at the expected path
-        expected_path = os.path.join(backbone_dir, "resnet50_miil_21k.pth")
-        if not os.path.exists(expected_path):
-            # Search for .pth file in extracted contents
-            for root, dirs, files in os.walk(backbone_dir):
-                for f in files:
-                    if f.endswith(".pth"):
-                        src = os.path.join(root, f)
-                        os.rename(src, expected_path)
-                        print(f"Moved {src} -> {expected_path}")
-                        break
-        if os.path.exists(expected_path):
-            print(f"Backbone weights at {expected_path}")
+    expected_backbone = os.path.join(backbone_dir, "resnet50_miil_21k.pth")
+
+    if os.path.exists(backbone_archive):
+        print("Extracting backbone weights...")
+        extract_archive(backbone_archive, backbone_dir)
+        if not os.path.exists(expected_backbone):
+            pth = find_file(backbone_dir, lambda f: f.endswith(".pth"))
+            if pth:
+                shutil.move(pth, expected_backbone)
+        if os.path.exists(expected_backbone):
+            print(f"  -> {expected_backbone}")
         else:
-            print("WARNING: Could not find backbone .pth file in tar")
+            print("  WARNING: Could not find .pth file in archive")
     else:
-        print(f"WARNING: {backbone_tar} not found, skipping backbone weights")
+        print(f"WARNING: {backbone_archive} not found")
 
     # TSAM weights
-    tsam_tar = os.path.join(input_dir, "tsam_weights.tar")
+    tsam_archive = os.path.join(input_dir, "tsam_weights.tar")
     weights_dir = os.path.join(repo_root, "weights")
-    if os.path.exists(tsam_tar):
-        os.makedirs(weights_dir, exist_ok=True)
-        print(f"Extracting TSAM weights...")
-        with tarfile.open(tsam_tar, 'r') as tf:
-            tf.extractall(weights_dir)
+    checkpoint_dir = os.path.join(weights_dir, "checkpoint")
+    expected_ckpt = os.path.join(checkpoint_dir, "balanced.ckpt.pth.tar")
+    args_json = os.path.join(weights_dir, "args.json")
 
-        # Ensure checkpoint directory structure exists
-        checkpoint_dir = os.path.join(weights_dir, "checkpoint")
-        expected_ckpt = os.path.join(checkpoint_dir, "balanced.ckpt.pth.tar")
+    if os.path.exists(tsam_archive):
+        print("Extracting TSAM weights...")
+        extract_archive(tsam_archive, weights_dir)
 
+        # Find and place checkpoint
         if not os.path.exists(expected_ckpt):
             os.makedirs(checkpoint_dir, exist_ok=True)
-            # Search for checkpoint file
-            for root, dirs, files in os.walk(weights_dir):
-                for f in files:
-                    if "balanced" in f and f.endswith(".pth.tar"):
-                        src = os.path.join(root, f)
-                        if src != expected_ckpt:
-                            os.rename(src, expected_ckpt)
-                            print(f"Moved {src} -> {expected_ckpt}")
-                        break
-                    elif f.endswith(".pth.tar") or f.endswith(".pth"):
-                        src = os.path.join(root, f)
-                        if src != expected_ckpt:
-                            os.rename(src, expected_ckpt)
-                            print(f"Moved {src} -> {expected_ckpt}")
-                        break
+            ckpt = find_file(weights_dir, lambda f: f.endswith(".pth.tar") or
+                             (f.endswith(".pth") and "checkpoint" not in f and f != "resnet50_miil_21k.pth"))
+            if ckpt and ckpt != expected_ckpt:
+                shutil.move(ckpt, expected_ckpt)
 
-        # Check for args.json
-        args_json = os.path.join(weights_dir, "args.json")
+        # Find or generate args.json
         if not os.path.exists(args_json):
-            # Search in extracted files
-            for root, dirs, files in os.walk(weights_dir):
-                for f in files:
-                    if f == "args.json":
-                        src = os.path.join(root, f)
-                        if src != args_json:
-                            os.rename(src, args_json)
-                            print(f"Moved {src} -> {args_json}")
-                        break
+            found = find_file(weights_dir, lambda f: f == "args.json")
+            if found and found != args_json:
+                shutil.move(found, args_json)
 
         if not os.path.exists(args_json):
-            # Generate args.json with default TSM architecture config
-            import json
-            default_args = {
-                "emotion_jumps": {
-                    "emotion_ids": [1, 2, 3, 4, 5, 6, 7, 8],
-                    "clip_length": 5,
-                    "jump": 0.5,
-                    "porog": 0.2,
-                    "background_size": -1
-                },
-                "dataset": {
-                    "name": "adcumen",
-                    "data_dir": "./data",
-                    "dir_videos": "videos",
-                    "dir_frames": "frames_fps_10",
-                    "dir_audios": "audios",
-                    "fileVDB": "DataAdcumen/VDB.pickle",
-                    "file_train_list": "DataAdcumen/training_0",
-                    "file_val_list": "DataAdcumen/valid_0_p2",
-                    "file_test_list": "DataAdcumen/valid_0_p1",
-                    "video_img_param": {
-                        "image_tmpl": "{:06d}.jpg",
-                        "img_input_size": 256,
-                        "img_output_size": 224
-                    },
-                    "video_augmentation": {
-                        "RandomHorizontalFlip": True,
-                        "scales": [1, 0.875, 0.75, 0.66],
-                        "Adjust_sharpness": 2.0,
-                        "ColorJitter": False,
-                        "RandomGrayscale": 0.0,
-                        "GaussianBlur": False
-                    },
-                    "audio_img_param": {
-                        "window_sizes": [25, 50, 100],
-                        "hop_sizes": [10, 25, 50],
-                        "n_mels": 224,
-                        "eps": 1e-6,
-                        "spec_size": [3, 224, 224],
-                        "num_segments": 1,
-                        "m_segments": 1
-                    },
-                    "audio_augmentation": {
-                        "status": True,
-                        "random_shift_waveform": [0.1, 0.1]
-                    },
-                    "fps": 10
-                },
-                "TSM": {
-                    "video_segments": 12,
-                    "audio_segments": 1,
-                    "motion": False,
-                    "num_class": 8,
-                    "main": {
-                        "arch": "resnet50_timm",
-                        "pretrain": "imagenet",
-                        "dropout": 0.5,
-                        "last_pool": 1,
-                        "input_mode": 2,
-                        "backbone_weights": "net_weigths/resnet50_miil_21k.pth"
-                    },
-                    "shift_temporal": {
-                        "status": True,
-                        "f_div": 8,
-                        "shift_depth": 1,
-                        "n_insert": 2,
-                        "m_insert": 0
-                    },
-                    "shift_temporal_modality": {
-                        "status": False,
-                        "f_div": 8,
-                        "n_insert": 2,
-                        "m_insert": 1
-                    },
-                    "shift_spatial": {
-                        "status": False,
-                        "f_div": 8,
-                        "n_insert": 2,
-                        "m_insert": 1
-                    },
-                    "motion_param": {
-                        "k_frames": 5,
-                        "sharpen_cycles": 1,
-                        "HW_conv_kernel": 9,
-                        "HW_conv_sigma": 1.1,
-                        "normadd": 0
-                    }
-                },
-                "net_run_param": {
-                    "epochs": 10,
-                    "batch_size": 8,
-                    "num_workers": 4
-                },
-                "net_optim_param": {
-                    "lr": 0.1,
-                    "lr_decay": [0.1, 3, 0.01, 6, 0.001, 8],
-                    "momentum": 0.9,
-                    "gd": 20,
-                    "weight_decay": 1e-4
-                },
-                "save_epoch": [],
-                "root_folder": "logs"
-            }
-            with open(args_json, 'w') as f:
-                json.dump(default_args, f, indent=4)
-            print(f"Generated {args_json}")
+            _generate_default_args_json(args_json)
 
         if os.path.exists(expected_ckpt):
-            print(f"TSAM weights at {expected_ckpt}")
+            print(f"  -> {expected_ckpt}")
         else:
-            print("WARNING: Could not find TSAM checkpoint in tar")
+            print("  WARNING: Could not find checkpoint in archive")
+        if os.path.exists(args_json):
+            print(f"  -> {args_json}")
     else:
-        print(f"WARNING: {tsam_tar} not found, skipping TSAM weights")
+        print(f"WARNING: {tsam_archive} not found")
+
+
+def _generate_default_args_json(args_json):
+    """Generate default args.json for the TSAM model."""
+    import json
+    default_args = {
+        "emotion_jumps": {
+            "emotion_ids": [1, 2, 3, 4, 5, 6, 7, 8],
+            "clip_length": 5, "jump": 0.5, "porog": 0.2, "background_size": -1
+        },
+        "dataset": {
+            "name": "adcumen", "data_dir": "./data",
+            "dir_videos": "videos", "dir_frames": "frames_fps_10", "dir_audios": "audios",
+            "fileVDB": "DataAdcumen/VDB.pickle",
+            "file_train_list": "DataAdcumen/training_0",
+            "file_val_list": "DataAdcumen/valid_0_p2",
+            "file_test_list": "DataAdcumen/valid_0_p1",
+            "video_img_param": {"image_tmpl": "{:06d}.jpg", "img_input_size": 256, "img_output_size": 224},
+            "video_augmentation": {"RandomHorizontalFlip": True, "scales": [1, 0.875, 0.75, 0.66],
+                                   "Adjust_sharpness": 2.0, "ColorJitter": False, "RandomGrayscale": 0.0,
+                                   "GaussianBlur": False},
+            "audio_img_param": {"window_sizes": [25, 50, 100], "hop_sizes": [10, 25, 50],
+                                "n_mels": 224, "eps": 1e-6, "spec_size": [3, 224, 224],
+                                "num_segments": 1, "m_segments": 1},
+            "audio_augmentation": {"status": True, "random_shift_waveform": [0.1, 0.1]},
+            "fps": 10
+        },
+        "TSM": {
+            "video_segments": 12, "audio_segments": 1, "motion": False, "num_class": 8,
+            "main": {"arch": "resnet50_timm", "pretrain": "imagenet", "dropout": 0.5,
+                     "last_pool": 1, "input_mode": 2,
+                     "backbone_weights": "net_weigths/resnet50_miil_21k.pth"},
+            "shift_temporal": {"status": True, "f_div": 8, "shift_depth": 1, "n_insert": 2, "m_insert": 0},
+            "shift_temporal_modality": {"status": False, "f_div": 8, "n_insert": 2, "m_insert": 1},
+            "shift_spatial": {"status": False, "f_div": 8, "n_insert": 2, "m_insert": 1},
+            "motion_param": {"k_frames": 5, "sharpen_cycles": 1, "HW_conv_kernel": 9,
+                             "HW_conv_sigma": 1.1, "normadd": 0}
+        },
+        "net_run_param": {"epochs": 10, "batch_size": 8, "num_workers": 4},
+        "net_optim_param": {"lr": 0.1, "lr_decay": [0.1, 3, 0.01, 6, 0.001, 8],
+                            "momentum": 0.9, "gd": 20, "weight_decay": 1e-4},
+        "save_epoch": [], "root_folder": "logs"
+    }
+    with open(args_json, 'w') as f:
+        json.dump(default_args, f, indent=4)
+    print(f"  Generated {args_json}")
 
 
 def main():
