@@ -188,7 +188,7 @@ def generate_split_files(input_dir, output_dir):
     return splits
 
 
-def build_vdb(splits, output_path, clip_length=5, frames_dir=None):
+def build_vdb(splits, output_path, clip_length=5):
     """Build VDB.pickle from CSV data.
 
     Creates a VideoDB-compatible pickle that works with the existing
@@ -238,13 +238,6 @@ def build_vdb(splits, output_path, clip_length=5, frames_dir=None):
         # Estimate duration from max start_second + clip_length
         max_t = max(s for s, _ in video_labels[vid])
         duration = max_t + clip_length + 1
-
-        # If frames directory exists, get actual frame count
-        if frames_dir:
-            vid_frames_dir = os.path.join(frames_dir, vid)
-            if os.path.isdir(vid_frames_dir):
-                n_frames = len(os.listdir(vid_frames_dir))
-                duration = max(duration, n_frames // 10 + 1)
 
         v = Video.__new__(Video)
         v.VID = vid
@@ -548,7 +541,7 @@ def main():
     # Step 5: Build VDB.pickle
     if splits:
         vdb_path = os.path.join(data_adcumen_dir, "VDB.pickle")
-        build_vdb(splits, vdb_path, frames_dir=frames_dir if os.path.isdir(frames_dir) else None)
+        build_vdb(splits, vdb_path)
     print()
 
     # Step 6: Extract weights
