@@ -27,6 +27,7 @@ from torch import nn
 from torch.nn.init import normal_, constant_
 import torchvision
 
+import os
 import sys
 import timm
 
@@ -55,7 +56,13 @@ def timm_load_model_weights(model, model_path):
     This function is specifically designed to work with models from the TIMM library. It loads the weights from the
     specified file into the model, handling any mismatches or missing layers gracefully by reporting them.
     """
+    if not os.path.exists(model_path):
+        print(f'WARNING: backbone weights not found at {model_path}, using random init')
+        return model
     state = torch.load(model_path, map_location='cpu', weights_only=False)
+    if 'state_dict' not in state:
+        print(f'WARNING: backbone weights file has no state_dict key (keys: {list(state.keys())}), skipping')
+        return model
     for key in model.state_dict():
         if 'num_batches_tracked' in key:
             continue
