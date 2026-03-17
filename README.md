@@ -6,7 +6,8 @@
 
 <p align="center">
   <a href="https://www.nature.com/articles/s41598-024-76968-9">Paper</a> &middot;
-  <a href="https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions">Dataset & Weights</a>
+  <a href="https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions">Dataset</a> &middot;
+  <a href="https://huggingface.co/dnamodel/tsam-viewer-emotions">Model Weights</a>
 </p>
 
 Code and pre-trained model for ["Decoding Viewer Emotions in Video Ads"](https://www.nature.com/articles/s41598-024-76968-9) (Antonov et al., *Nature Scientific Reports*, 2024). The Temporal Shift Augmented Module (TSAM) predicts viewers' emotional reactions to video advertisements from short 5-second excerpts, processing both video frames and audio.
@@ -26,9 +27,16 @@ pip install -r requirements.txt
 ```python
 from huggingface_hub import snapshot_download
 
+# Download dataset (video clips and CSV splits)
 snapshot_download(
     repo_id="dnamodel/adcumen-viewer-emotions",
     repo_type="dataset",
+    local_dir="./adcumen-data"
+)
+
+# Download model weights
+snapshot_download(
+    repo_id="dnamodel/tsam-viewer-emotions",
     local_dir="./adcumen-data"
 )
 ```
@@ -69,15 +77,15 @@ The dataset contains 26,635 five-second video clips from video advertisements, a
 | Surprise  | 3,553 | 2,841  | 387        | 325   |
 | **Total** | **26,635** | **21,392** | **2,856** | **2,387** |
 
-### Data on HuggingFace
+### HuggingFace Repositories
 
-**[huggingface.co/datasets/dnamodel/adcumen-viewer-emotions](https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions)**
-
-Contents:
+**Dataset:** [huggingface.co/datasets/dnamodel/adcumen-viewer-emotions](https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions)
 - `training.csv`, `validation.csv`, `testing.csv` -- dataset splits with columns: `Video_Name`, `Start_Second`, `Label`, `Clips_Name`
 - `5-second_MP4_Clips.zip` -- the 26,635 five-second video clips (MP4)
-- `backbone_weights.tar` -- TSAM model checkpoint (balanced accuracy)
-- `tsam_weights.tar` -- TSAM model checkpoint (used by default for inference)
+
+**Model weights:** [huggingface.co/dnamodel/tsam-viewer-emotions](https://huggingface.co/dnamodel/tsam-viewer-emotions)
+- `backbone_weights.tar` -- ResNet50 backbone pre-trained on ImageNet-21K
+- `tsam_weights.tar` -- TSAM model checkpoint (best balanced accuracy)
 
 ## Project Structure
 
