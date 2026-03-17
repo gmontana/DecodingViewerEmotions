@@ -99,9 +99,9 @@ Contents:
 
 ## Requirements
 
-- Python 3.8+
-- PyTorch 1.12+
-- ffmpeg (for preprocessing)
+- Python 3.10+
+- PyTorch 2.5+
+- ffmpeg (system install required for both preprocessing and audio loading)
 - CUDA-capable GPU (for inference)
 
 See `requirements.txt` for Python packages.
