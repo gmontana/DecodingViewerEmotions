@@ -31,7 +31,7 @@ def load_model(path_checkpoint,  model, optimizer, DataParallel=False, Filter_la
 
     if os.path.isfile(path_checkpoint):
         print(f"=> loading checkpoint {path_checkpoint}\n")
-        checkpoint = torch.load(path_checkpoint)
+        checkpoint = torch.load(path_checkpoint, weights_only=False)
 
         data_state = checkpoint['data_state']
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
