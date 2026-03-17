@@ -289,85 +289,44 @@ def build_vdb(splits, output_path, clip_length=5):
         print(f"  {name} (eid={eid}): {label_counts.get(eid, 0)}")
 
 
-def extract_archive(archive_path, output_dir):
-    """Extract a tar or zip archive (HuggingFace .tar files may actually be zips)."""
-    os.makedirs(output_dir, exist_ok=True)
-    if zipfile.is_zipfile(archive_path):
-        with zipfile.ZipFile(archive_path, 'r') as zf:
-            zf.extractall(output_dir)
-    else:
-        with tarfile.open(archive_path, 'r') as tf:
-            tf.extractall(output_dir)
-
-
-def find_file(search_dir, pattern):
-    """Find a file matching pattern in search_dir recursively."""
-    for root, dirs, files in os.walk(search_dir):
-        for f in files:
-            if pattern(f):
-                return os.path.join(root, f)
-    return None
-
-
 def extract_weights(input_dir, repo_root):
-    """Extract backbone and TSAM weights from archive files."""
+    """Place backbone and TSAM weights at the expected paths.
+
+    The HuggingFace .tar files are actually PyTorch weight files
+    (torch.save uses zip format internally), not archives to extract.
+    """
     import shutil
 
-    # Backbone weights
-    backbone_archive = os.path.join(input_dir, "backbone_weights.tar")
+    # Backbone weights: copy directly as .pth file
+    backbone_src = os.path.join(input_dir, "backbone_weights.tar")
     backbone_dir = os.path.join(repo_root, "net_weigths")
     expected_backbone = os.path.join(backbone_dir, "resnet50_miil_21k.pth")
 
-    if os.path.exists(backbone_archive):
-        print("Extracting backbone weights...")
-        extract_archive(backbone_archive, backbone_dir)
-        if not os.path.exists(expected_backbone):
-            pth = find_file(backbone_dir, lambda f: f.endswith(".pth"))
-            if pth:
-                shutil.move(pth, expected_backbone)
-        if os.path.exists(expected_backbone):
-            print(f"  -> {expected_backbone}")
-        else:
-            print("  WARNING: Could not find .pth file in archive")
+    if os.path.exists(backbone_src):
+        os.makedirs(backbone_dir, exist_ok=True)
+        shutil.copy2(backbone_src, expected_backbone)
+        print(f"Backbone weights -> {expected_backbone}")
     else:
-        print(f"WARNING: {backbone_archive} not found")
+        print(f"WARNING: {backbone_src} not found")
 
-    # TSAM weights
-    tsam_archive = os.path.join(input_dir, "tsam_weights.tar")
+    # TSAM weights: copy directly as checkpoint file
+    tsam_src = os.path.join(input_dir, "tsam_weights.tar")
     weights_dir = os.path.join(repo_root, "weights")
     checkpoint_dir = os.path.join(weights_dir, "checkpoint")
     expected_ckpt = os.path.join(checkpoint_dir, "balanced.ckpt.pth.tar")
     args_json = os.path.join(weights_dir, "args.json")
 
-    if os.path.exists(tsam_archive):
-        print("Extracting TSAM weights...")
-        extract_archive(tsam_archive, weights_dir)
+    if os.path.exists(tsam_src):
+        os.makedirs(checkpoint_dir, exist_ok=True)
+        shutil.copy2(tsam_src, expected_ckpt)
+        print(f"TSAM checkpoint  -> {expected_ckpt}")
 
-        # Find and place checkpoint
-        if not os.path.exists(expected_ckpt):
-            os.makedirs(checkpoint_dir, exist_ok=True)
-            ckpt = find_file(weights_dir, lambda f: f.endswith(".pth.tar") or
-                             (f.endswith(".pth") and "checkpoint" not in f and f != "resnet50_miil_21k.pth"))
-            if ckpt and ckpt != expected_ckpt:
-                shutil.move(ckpt, expected_ckpt)
-
-        # Find or generate args.json
-        if not os.path.exists(args_json):
-            found = find_file(weights_dir, lambda f: f == "args.json")
-            if found and found != args_json:
-                shutil.move(found, args_json)
-
+        # Generate args.json if not present
         if not os.path.exists(args_json):
             _generate_default_args_json(args_json)
-
-        if os.path.exists(expected_ckpt):
-            print(f"  -> {expected_ckpt}")
-        else:
-            print("  WARNING: Could not find checkpoint in archive")
-        if os.path.exists(args_json):
-            print(f"  -> {args_json}")
+            print(f"Model config     -> {args_json}")
     else:
-        print(f"WARNING: {tsam_archive} not found")
+        print(f"WARNING: {tsam_src} not found")
 
 
 def _generate_default_args_json(args_json):
