@@ -1,63 +1,27 @@
-<h1 align="center" style="font-size: 36px;">Decoding Viewer Emotions in Video Ads</h1>
+<h1 align="center">Decoding Viewer Emotions in Video Ads</h1>
 
 <p align="center">
-  <img width="600px" src="example.png" alt="example" />
+  <img width="450px" src="TSAM.png" alt="TSAM Architecture" />
 </p>
-
-
-## Overview 
-
-This repository contains the code and data to replicate the findings from [“Decoding Viewer Emotions in Video Ads”](https://www.nature.com/articles/s41598-024-76968-9) by Alexey Antonov, Shravan Sampath Kumar, Jiefei Wei, William Headley, Orlando Wood, and Giovanni Montana, published in *Nature Scientific Reports*.
-
-
-We provide access to:
-
-- Python code for training the Temporal Shift Augmented Module (TSAM) architecture detailed in the paper and for inference.
-- Pre-trained model weights facilitating the reproduction of reported experimental outcomes.
-- The dataset used in the paper consisting of 5-second video excerpts utilized for training, validation, and testing, annotated for seven distinct emotional categories and their temporal onset. 
-
-## Paper Summary
-
-Our study introduces a novel deep learning framework capable of predicting viewers' emotional reactions to video advertisements using short, 5-second excerpts. Leveraging a dataset derived from System1’s proprietary methodologies, encompassing over 30,000 full-lenght video ads annotated by around 75 viewers each, our methodology integrates convolutional neural networks to process both video and audio data, achieving notable accuracy in identifying salient emotional excerpts.
-
-### Methodology Summary
-
-- **Emotional Jumps Detection**: From the initial pool of video ads, we identified significant emotional transitions, termed 'emotional jumps', utilizing viewer annotations to pinpoint moments of pronounced emotional shifts.
-- **TSAM Architecture Development**: We developed the Temporal Shift Augmented Module (TSAM) architecture, a convolutional neural network model that integrates both video frames and audio signals to classify short video clips based on their emotional content.
-- **Data Preparation and Model Training**: Utilizing the detected emotional jumps, we prepared a dataset of 5-second clips, each labeled with the corresponding emotion. This dataset was then used to train, validate, and test the TSAM model, demonstrating its ability to accurately classify the emotional content of unseen video clips.
 
 <p align="center">
-  <img width="450px" src="TSAM.png" alt="TSAM" />
+  <a href="https://www.nature.com/articles/s41598-024-76968-9">Paper</a> &middot;
+  <a href="https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions">Dataset & Weights</a>
 </p>
 
-## Dataset Breakdown 
+Code and pre-trained model for ["Decoding Viewer Emotions in Video Ads"](https://www.nature.com/articles/s41598-024-76968-9) (Antonov et al., *Nature Scientific Reports*, 2024). The Temporal Shift Augmented Module (TSAM) predicts viewers' emotional reactions to video advertisements from short 5-second excerpts, processing both video frames and audio.
 
-The study utilized a total of 26,637 5-second video clips, divided into training, validation, and test sets as follows:
+## Quick Start
 
-| Emotion    | Total | Train | Validation | Test |
-|------------|-------|-------|------------|------|
-| Anger      | 2,894 | 2,282 | 404        | 208  |
-| Contempt   | 3,317 | 2,581 | 367        | 369  |
-| Disgust    | 3,061 | 2,564 | 254        | 243  |
-| Fear       | 3,166 | 2,549 | 317        | 300  |
-| Happiness  | 3,577 | 2,918 | 383        | 276  |
-| Sadness    | 3,576 | 2,886 | 346        | 344  |
-| Surprise   | 3,553 | 2,841 | 387        | 325  |
-| **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
+### 1. Install dependencies
 
-## Data and Weights
+```bash
+pip install -r requirements.txt
+```
 
-The dataset and pre-trained model weights are hosted on HuggingFace:
+[ffmpeg](https://ffmpeg.org/download.html) is also required for preprocessing.
 
-**[https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions](https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions)**
-
-The repository contains:
-- `training.csv`, `validation.csv`, `testing.csv` — dataset split files
-- `5-second_MP4_Clips.zip` — the 26,637 five-second video clips (MP4)
-- `backbone_weights.tar` — pre-trained ResNet50 backbone weights (ImageNet-21K)
-- `tsam_weights.tar` — trained TSAM model checkpoint
-
-To download all files:
+### 2. Download data and weights
 
 ```python
 from huggingface_hub import snapshot_download
@@ -69,22 +33,110 @@ snapshot_download(
 )
 ```
 
-### Dataset Access Disclaimer
+### 3. Preprocess
 
-The dataset leverages System1's proprietary "Test Your Ad®" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
+```bash
+python setup_data.py --input ./adcumen-data --workers 8
+```
 
-## Using the Code
+This extracts video frames, audio, and model weights into the expected directory structure. Run `python setup_data.py --help` for all options.
 
-The included Python code, leveraging the PyTorch framework, is well-documented and user-friendly. It allows for the reproduction of the paper's experiments or adaptation for your datasets.
+### 4. Run inference
 
-In addition to training the TSM-augmented architectures described in our paper, this code also supports inference tasks.
+```bash
+python predict.py \
+    --data config/default.json \
+    --model weights \
+    --type test \
+    --id test_run
+```
 
-Should you encounter issues or have questions, please open a GitHub issue on this repository.
+Predictions are saved to `./data/predicted/test_run/`.
 
-### License
+## Dataset
 
-For the full license terms, please refer to the [LICENCE](LICENCE) file included in this repository. The TSAM software and associated documentation provided in this repository are made available under a custom license that permits use solely for academic research and non-commercial evaluation. Commercial use and redistribution under terms not specified within this license are strictly prohibited without express written permission from the University of Warwick. For any inquiries regarding permissible use or for seeking permissions beyond the scope of this license, please contact Warwick Ventures at ventures@warwick.ac.uk.
+The dataset contains 26,637 five-second video clips from video advertisements, annotated for seven emotional categories:
 
-### Contact
+| Emotion   | Total | Train  | Validation | Test  |
+|-----------|-------|--------|------------|-------|
+| Anger     | 2,894 | 2,282  | 404        | 208   |
+| Contempt  | 3,317 | 2,581  | 367        | 369   |
+| Disgust   | 3,061 | 2,564  | 254        | 243   |
+| Fear      | 3,166 | 2,549  | 317        | 300   |
+| Happiness | 3,577 | 2,918  | 383        | 276   |
+| Sadness   | 3,576 | 2,886  | 346        | 344   |
+| Surprise  | 3,553 | 2,841  | 387        | 325   |
+| **Total** | **26,637** | **21,392** | **2,856** | **2,387** |
+
+### Data on HuggingFace
+
+**[huggingface.co/datasets/dnamodel/adcumen-viewer-emotions](https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions)**
+
+Contents:
+- `training.csv`, `validation.csv`, `testing.csv` -- dataset splits with columns: `Video_Name`, `Start_Second`, `Label`, `Clips_Name`
+- `5-second_MP4_Clips.zip` -- the 26,637 five-second video clips (MP4)
+- `backbone_weights.tar` -- ResNet50 backbone pre-trained on ImageNet-21K
+- `tsam_weights.tar` -- trained TSAM model checkpoint
+
+## Project Structure
+
+```
+.
+├── setup_data.py              # Preprocesses HuggingFace download
+├── predict.py                 # Run inference with trained model
+├── train.py                   # Train TSAM model
+├── config/
+│   └── default.json           # Default config (relative paths)
+├── lib/
+│   ├── dataset/               # Data loading (video + audio)
+│   ├── model/                 # TSAM architecture
+│   └── utils/                 # Training utilities
+├── mvlib/                     # Video processing library
+├── DataAdcumen/               # Split files and VDB
+├── requirements.txt
+└── LICENCE
+```
+
+## Requirements
+
+- Python 3.8+
+- PyTorch 1.12+
+- ffmpeg (for preprocessing)
+- CUDA-capable GPU (for inference)
+
+See `requirements.txt` for Python packages.
+
+## Training
+
+```bash
+python train.py \
+    --config config/default.json \
+    --cuda_ids 0 \
+    --run_id my_experiment
+```
+
+## Dataset Access Disclaimer
+
+The dataset leverages System1's proprietary "Test Your Ad" tool for public, educational, and illustrative use. The advertisements and excerpts, while derived from System1's tool, remain the property of their original owners. Usage beyond this study's scope requires explicit permission from those owners. By accessing the dataset, you agree to these conditions.
+
+## License
+
+The TSAM software and associated documentation are made available under a custom license that permits use solely for academic research and non-commercial evaluation. See [LICENCE](LICENCE) for full terms. For commercial use inquiries, contact Warwick Ventures at ventures@warwick.ac.uk.
+
+## Citation
+
+```bibtex
+@article{antonov2024decoding,
+  title={Decoding viewer emotions in video ads},
+  author={Antonov, Alexey and Kumar, Shravan Sampath and Wei, Jiefei and Headley, William and Wood, Orlando and Montana, Giovanni},
+  journal={Scientific Reports},
+  volume={14},
+  pages={25680},
+  year={2024},
+  publisher={Nature Publishing Group}
+}
+```
+
+## Contact
 
 For questions, suggestions, or collaborations, please contact Giovanni Montana at g.montana@warwick.ac.uk.

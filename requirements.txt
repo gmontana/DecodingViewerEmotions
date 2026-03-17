@@ -1,0 +1,9 @@
+torch>=1.12.0
+torchvision>=0.13.0
+torchaudio>=0.12.0
+timm>=0.6.0
+tqdm
+scikit-learn
+numpy
+Pillow
+huggingface_hub
