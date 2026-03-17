@@ -342,6 +342,12 @@ def main():
         args_in.cuda_ids = "0"
 
     args["cuda_ids"] = list(map(int, args_in.cuda_ids.split("_")))
+    args["video_segments"] = args["TSM"]["video_segments"]
+    args["audio_segments"] = args["TSM"]["audio_segments"]
+    args["dataset"]["k_frames"] = 1
+    if args["TSM"]["motion"]:
+        args["dataset"]["k_frames"] = args["TSM"]["motion_param"]["k_frames"]
+    args["segment_frames"] = args["dataset"]["k_frames"]
 
     run_model(args_in, args, path_checkpoint,
               file_predictV2, mode_train_val=mode_train_val)
