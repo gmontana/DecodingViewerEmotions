@@ -172,9 +172,9 @@ class BackBone(nn.Module):
 
         if "timm" in param["arch"]:
             base_model = timm.create_model('resnet50', pretrained=False)
-            base_model = timm_load_model_weights(
-                base_model, "net_weigths/resnet50_miil_21k.pth")
-            print("prepare_base_model timm")
+            backbone_weights = param.get("backbone_weights", "net_weigths/resnet50_miil_21k.pth")
+            base_model = timm_load_model_weights(base_model, backbone_weights)
+            print(f"prepare_base_model timm, weights: {backbone_weights}")
         else:
             base_model = getattr(torchvision.models, param["arch"])(
                 True if param["pretrain"] == 'imagenet' else False)

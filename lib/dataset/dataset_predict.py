@@ -169,7 +169,7 @@ class PredictFullVideoDataSet(torch.utils.data.Dataset):
 
             ifolder_size = line_data["imagefolder_size"]
             T = ifolder_size // self.fps
-            for t in range(T - self.clip_length):
+            for t in range(max(1, T - self.clip_length)):
                 line_data_new = line_data.copy()
                 line_data_new["t"] = t
                 line_data_t.append(line_data_new)
