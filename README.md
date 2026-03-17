@@ -55,7 +55,7 @@ Predictions are saved to `./data/predicted/test_run/`.
 
 ## Dataset
 
-The dataset contains 26,637 five-second video clips from video advertisements, annotated for seven emotional categories:
+The dataset contains 26,635 five-second video clips from video advertisements, annotated for eight emotional categories:
 
 | Emotion   | Total | Train  | Validation | Test  |
 |-----------|-------|--------|------------|-------|
@@ -64,9 +64,10 @@ The dataset contains 26,637 five-second video clips from video advertisements, a
 | Disgust   | 3,061 | 2,564  | 254        | 243   |
 | Fear      | 3,166 | 2,549  | 317        | 300   |
 | Happiness | 3,577 | 2,918  | 383        | 276   |
+| Neutral   | 3,491 | 2,771  | 398        | 322   |
 | Sadness   | 3,576 | 2,886  | 346        | 344   |
 | Surprise  | 3,553 | 2,841  | 387        | 325   |
-| **Total** | **26,637** | **21,392** | **2,856** | **2,387** |
+| **Total** | **26,635** | **21,392** | **2,856** | **2,387** |
 
 ### Data on HuggingFace
 
@@ -74,9 +75,9 @@ The dataset contains 26,637 five-second video clips from video advertisements, a
 
 Contents:
 - `training.csv`, `validation.csv`, `testing.csv` -- dataset splits with columns: `Video_Name`, `Start_Second`, `Label`, `Clips_Name`
-- `5-second_MP4_Clips.zip` -- the 26,637 five-second video clips (MP4)
-- `backbone_weights.tar` -- ResNet50 backbone pre-trained on ImageNet-21K
-- `tsam_weights.tar` -- trained TSAM model checkpoint
+- `5-second_MP4_Clips.zip` -- the 26,635 five-second video clips (MP4)
+- `backbone_weights.tar` -- TSAM model checkpoint (balanced accuracy)
+- `tsam_weights.tar` -- TSAM model checkpoint (used by default for inference)
 
 ## Project Structure
 
