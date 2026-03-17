@@ -21,7 +21,7 @@ from torch import nn
 
 class VCM(torch.nn.Module):
 
-     """
+    """
     VCM represents the complete model architecture integrating input processing,
     feature extraction, and output layers for a machine learning task.
 
