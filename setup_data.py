@@ -29,11 +29,17 @@ from pathlib import Path
 
 
 def extract_clips(input_dir, videos_dir):
-    """Unzip 5-second_MP4_Clips.zip into videos_dir."""
+    """Unzip 5-second_MP4_Clips.zip into videos_dir (skips if already extracted)."""
     zip_path = os.path.join(input_dir, "5-second_MP4_Clips.zip")
     if not os.path.exists(zip_path):
         print(f"ERROR: {zip_path} not found")
         sys.exit(1)
+
+    # Check if clips are already extracted
+    existing = find_mp4_files(videos_dir) if os.path.isdir(videos_dir) else {}
+    if len(existing) > 1000:
+        print(f"Clips already extracted ({len(existing)} found), skipping.")
+        return
 
     print(f"Extracting clips from {zip_path}...")
     os.makedirs(videos_dir, exist_ok=True)
@@ -152,7 +158,8 @@ def read_csv(csv_path):
 def generate_split_files(input_dir, output_dir):
     """Generate split files from HuggingFace CSVs.
 
-    Split files contain unique Video_Name values (one per line).
+    Each clip has a unique Clips_Name (e.g., 6mWfuH7p, 6mWfuH7p_2).
+    Split files contain one Clips_Name per line.
     Returns dict mapping split_name -> list of CSV row dicts.
     """
     os.makedirs(output_dir, exist_ok=True)
@@ -173,17 +180,14 @@ def generate_split_files(input_dir, output_dir):
         rows = read_csv(csv_path)
         splits[split_key] = rows
 
-        # Write split file: unique Video_Name values, one per line
-        seen = set()
+        # Write split file: one Clips_Name per line
         split_path = os.path.join(output_dir, split_file)
         with open(split_path, 'w') as f:
             for row in rows:
-                vid = row["Video_Name"]
-                if vid not in seen:
-                    seen.add(vid)
-                    f.write(vid + "\n")
+                clip_name = row["Clips_Name"].replace(".mp4", "")
+                f.write(clip_name + "\n")
 
-        print(f"Generated {split_path} with {len(seen)} unique videos ({len(rows)} clips)")
+        print(f"Generated {split_path} with {len(rows)} clips")
 
     return splits
 
@@ -191,14 +195,10 @@ def generate_split_files(input_dir, output_dir):
 def build_vdb(splits, output_path, clip_length=5):
     """Build VDB.pickle from CSV data.
 
-    Creates a VideoDB-compatible pickle that works with the existing
-    MultiJumpDataSet code. Videos are organized by Video_Name, with
-    labeled clips at their original Start_Second offsets.
+    Each 5-second clip is treated as its own video entry with t=0.
+    Clips_Name is the video ID, frames are at frames_fps_10/{Clips_Name}/.
 
-    CSV Label column contains numeric labels 0-7 mapping to:
-        0=Anger, 1=Contempt, 2=Disgust, 3=Fear,
-        4=Happiness, 5=Neutral, 6=Sadness, 7=Surprise
-    These map to eid 1-8 (eid = label + 1).
+    CSV Label column: 0-7 numeric -> eid 1-8.
     """
     from mvlib.mvideo_lib import VideoDB, Video
     from mvlib.utils import save_pickle
@@ -206,83 +206,57 @@ def build_vdb(splits, output_path, clip_length=5):
     emotion_list = ["Anger", "Contempt", "Disgust", "Fear",
                     "Happiness", "Neutral", "Sadness", "Surprise"]
 
-    # Collect all clips grouped by Video_Name
-    # video_labels[VID] = [(start_second, eid), ...]
-    video_labels = {}
-    total_clips = 0
+    # Collect all clips
+    all_clips = {}
     for split_name, rows in splits.items():
         for row in rows:
-            vid = row["Video_Name"]
+            clip_name = row["Clips_Name"].replace(".mp4", "")
             label = int(row["Label"])
-            eid = label + 1  # CSV uses 0-7, code uses 1-8
-            start_sec = int(row["Start_Second"])
+            eid = label + 1  # CSV 0-7 -> code 1-8
+            all_clips[clip_name] = eid
 
-            if vid not in video_labels:
-                video_labels[vid] = []
-            video_labels[vid].append((start_sec, eid))
-            total_clips += 1
+    print(f"Building VDB from {len(all_clips)} clips...")
 
-    print(f"Building VDB from {total_clips} clips across {len(video_labels)} videos...")
-
-    # Create VDB object without calling __init__
+    # Create VDB object
     vdb = VideoDB.__new__(VideoDB)
     vdb.fileDescriptionVideos = ""
     vdb.fileIndividualProfiles = ""
     vdb.dirVideos = None
     vdb.positive_ID_filtr = {}
 
-    # Create Video objects for each unique Video_Name
+    # Each clip is its own "video" with Duration=clip_length
     vdb.VDB = {}
     vdb.VMAP = {}
-    for i, vid in enumerate(video_labels):
-        # Estimate duration from max start_second + clip_length
-        max_t = max(s for s, _ in video_labels[vid])
-        duration = max_t + clip_length + 1
-
+    for i, clip_name in enumerate(all_clips):
         v = Video.__new__(Video)
-        v.VID = vid
+        v.VID = clip_name
         v.AID = i
-        v.Duration = duration
+        v.Duration = clip_length
         v.StarRating = 0.0
         v.MarketId = "826"
         v.Title = ""
-        vdb.VDB[vid] = v
-        vdb.VMAP[i] = vid
+        vdb.VDB[clip_name] = v
+        vdb.VMAP[i] = clip_name
 
-    # Build synthetic APTV (Aggregated Profile per Time point per Video)
-    # For each video, create APTV entries covering all time points.
-    # For each labeled clip at (start_sec, eid):
-    #   APTV[VID][eid][start_sec] = 0, APTV[VID][eid][start_sec + clip_length] = 1.0
-    # This makes get_dAPTV produce dAPTV[eid][VID][start_sec] = 1.0
+    # Build APTV: for each clip, set labeled emotion to jump at t=0->t=clip_length
     vdb.APTV = {}
     vdb.IndividualProfiles = {}
-    for vid, labels in video_labels.items():
-        duration = vdb.VDB[vid].Duration
-        vdb.APTV[vid] = {}
-        for eid in range(1, 9):
-            vdb.APTV[vid][eid] = Counter()
-            for t in range(duration + 1):
-                vdb.APTV[vid][eid][t] = 0
-
-        # Set labeled emotions to have jumps at their time offsets
-        for start_sec, eid in labels:
-            t_end = start_sec + clip_length
-            if t_end <= duration:
-                vdb.APTV[vid][eid][t_end] = 1.0
-
-        # Minimal individual profiles (not used in inference)
-        vdb.IndividualProfiles[vid] = []
+    for clip_name, eid in all_clips.items():
+        vdb.APTV[clip_name] = {}
+        for e in range(1, 9):
+            vdb.APTV[clip_name][e] = Counter()
+            for t in range(clip_length + 1):
+                vdb.APTV[clip_name][e][t] = 0
+        # Labeled emotion: jump of 1.0 at t=0
+        vdb.APTV[clip_name][eid][clip_length] = 1.0
+        vdb.IndividualProfiles[clip_name] = []
 
     vdb.add_Emotions()
-
     save_pickle(output_path, vdb)
     print(f"Saved VDB.pickle to {output_path}")
 
     # Print label distribution
-    label_counts = Counter()
-    for labels in video_labels.values():
-        for _, eid in labels:
-            label_counts[eid] += 1
+    label_counts = Counter(all_clips.values())
     print("Label distribution:")
     for i, name in enumerate(emotion_list):
         eid = i + 1
