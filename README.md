@@ -45,9 +45,29 @@ The study utilized a total of 26,637 5-second video clips, divided into training
 | Surprise   | 3,553 | 2,841 | 387        | 325  |
 | **Total**  | **26,637** | **21,392** | **2,856** | **2,387** |
 
-## Data Availabilty  
+## Data and Weights
 
-Given the dataset's substantial volume, both video excerpts and model weights are hosted externally. To access them for research purposes, contact Professor Giovanni Montana (University of Warwick, UK) at g.montana@warwick.ac.uk with your affiliation details. A download link will be provided.
+The dataset and pre-trained model weights are hosted on HuggingFace:
+
+**[https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions](https://huggingface.co/datasets/dnamodel/adcumen-viewer-emotions)**
+
+The repository contains:
+- `training.csv`, `validation.csv`, `testing.csv` — dataset split files
+- `5-second_MP4_Clips.zip` — the 26,637 five-second video clips (MP4)
+- `backbone_weights.tar` — pre-trained ResNet50 backbone weights (ImageNet-21K)
+- `tsam_weights.tar` — trained TSAM model checkpoint
+
+To download all files:
+
+```python
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="dnamodel/adcumen-viewer-emotions",
+    repo_type="dataset",
+    local_dir="./adcumen-data"
+)
+```
 
 ### Dataset Access Disclaimer
 
