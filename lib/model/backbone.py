@@ -55,7 +55,7 @@ def timm_load_model_weights(model, model_path):
     This function is specifically designed to work with models from the TIMM library. It loads the weights from the
     specified file into the model, handling any mismatches or missing layers gracefully by reporting them.
     """
-    state = torch.load(model_path, map_location='cpu')
+    state = torch.load(model_path, map_location='cpu', weights_only=False)
     for key in model.state_dict():
         if 'num_batches_tracked' in key:
             continue
