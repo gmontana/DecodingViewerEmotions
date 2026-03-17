@@ -1,9 +1,11 @@
-torch>=1.12.0
-torchvision>=0.13.0
-torchaudio>=0.12.0
+torch>=2.5.0
+torchvision>=0.20.0
+torchaudio>=2.5.0
+torchcodec
 timm>=0.6.0
 tqdm
 scikit-learn
 numpy
 Pillow
+soundfile
 huggingface_hub
