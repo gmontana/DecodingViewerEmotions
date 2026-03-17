@@ -152,7 +152,8 @@ def read_csv(csv_path):
 def generate_split_files(input_dir, output_dir):
     """Generate split files from HuggingFace CSVs.
 
-    Returns dict mapping split_name -> list of {clip_name, video_name, start_second, label}.
+    Split files contain unique Video_Name values (one per line).
+    Returns dict mapping split_name -> list of CSV row dicts.
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -172,91 +173,112 @@ def generate_split_files(input_dir, output_dir):
         rows = read_csv(csv_path)
         splits[split_key] = rows
 
-        # Write split file: one clip name per line
+        # Write split file: unique Video_Name values, one per line
+        seen = set()
         split_path = os.path.join(output_dir, split_file)
         with open(split_path, 'w') as f:
             for row in rows:
-                clip_name = row["Clips_Name"].replace(".mp4", "")
-                f.write(clip_name + "\n")
+                vid = row["Video_Name"]
+                if vid not in seen:
+                    seen.add(vid)
+                    f.write(vid + "\n")
 
-        print(f"Generated {split_path} with {len(rows)} entries")
+        print(f"Generated {split_path} with {len(seen)} unique videos ({len(rows)} clips)")
 
     return splits
 
 
-def build_vdb(splits, output_path, clip_length=5):
+def build_vdb(splits, output_path, clip_length=5, frames_dir=None):
     """Build VDB.pickle from CSV data.
 
     Creates a VideoDB-compatible pickle that works with the existing
-    MultiJumpDataSet code. Each 5-second clip is treated as its own
-    video entry with a single time point at t=0.
+    MultiJumpDataSet code. Videos are organized by Video_Name, with
+    labeled clips at their original Start_Second offsets.
+
+    CSV Label column contains numeric labels 0-7 mapping to:
+        0=Anger, 1=Contempt, 2=Disgust, 3=Fear,
+        4=Happiness, 5=Neutral, 6=Sadness, 7=Surprise
+    These map to eid 1-8 (eid = label + 1).
     """
-    from mvlib.mvideo_lib import VideoDB, Video, Emotions
+    from mvlib.mvideo_lib import VideoDB, Video
     from mvlib.utils import save_pickle
 
     emotion_list = ["Anger", "Contempt", "Disgust", "Fear",
                     "Happiness", "Neutral", "Sadness", "Surprise"]
-    emotion_to_eid = {e: i + 1 for i, e in enumerate(emotion_list)}
 
-    # Collect all clips from all splits
-    all_clips = {}
+    # Collect all clips grouped by Video_Name
+    # video_labels[VID] = [(start_second, eid), ...]
+    video_labels = {}
+    total_clips = 0
     for split_name, rows in splits.items():
         for row in rows:
-            clip_name = row["Clips_Name"].replace(".mp4", "")
-            label = row["Label"]
-            eid = emotion_to_eid.get(label, -1)
-            if eid == -1:
-                print(f"WARNING: Unknown label '{label}' for clip {clip_name}")
-                continue
-            all_clips[clip_name] = {
-                "video_name": row["Video_Name"],
-                "start_second": int(row["Start_Second"]),
-                "label": label,
-                "eid": eid,
-            }
+            vid = row["Video_Name"]
+            label = int(row["Label"])
+            eid = label + 1  # CSV uses 0-7, code uses 1-8
+            start_sec = int(row["Start_Second"])
 
-    print(f"Building VDB from {len(all_clips)} clips...")
+            if vid not in video_labels:
+                video_labels[vid] = []
+            video_labels[vid].append((start_sec, eid))
+            total_clips += 1
 
-    # Create VDB object without calling __init__ (which expects file paths)
+    print(f"Building VDB from {total_clips} clips across {len(video_labels)} videos...")
+
+    # Create VDB object without calling __init__
     vdb = VideoDB.__new__(VideoDB)
     vdb.fileDescriptionVideos = ""
     vdb.fileIndividualProfiles = ""
     vdb.dirVideos = None
     vdb.positive_ID_filtr = {}
 
-    # Create Video objects for each clip
+    # Create Video objects for each unique Video_Name
     vdb.VDB = {}
     vdb.VMAP = {}
-    for i, (clip_name, info) in enumerate(all_clips.items()):
+    for i, vid in enumerate(video_labels):
+        # Estimate duration from max start_second + clip_length
+        max_t = max(s for s, _ in video_labels[vid])
+        duration = max_t + clip_length + 1
+
+        # If frames directory exists, get actual frame count
+        if frames_dir:
+            vid_frames_dir = os.path.join(frames_dir, vid)
+            if os.path.isdir(vid_frames_dir):
+                n_frames = len(os.listdir(vid_frames_dir))
+                duration = max(duration, n_frames // 10 + 1)
+
         v = Video.__new__(Video)
-        v.VID = clip_name
+        v.VID = vid
         v.AID = i
-        v.Duration = clip_length
+        v.Duration = duration
         v.StarRating = 0.0
         v.MarketId = "826"
         v.Title = ""
-        vdb.VDB[clip_name] = v
-        vdb.VMAP[i] = clip_name
+        vdb.VDB[vid] = v
+        vdb.VMAP[i] = vid
 
     # Build synthetic APTV (Aggregated Profile per Time point per Video)
-    # For each clip, we create a profile where:
-    #   - APTV[clip][eid][t] = 0 for all t and eid
-    #   - APTV[clip][labeled_eid][clip_length] = 1.0
-    # This ensures get_dAPTV produces dAPTV[labeled_eid][clip][0] = 1.0
+    # For each video, create APTV entries covering all time points.
+    # For each labeled clip at (start_sec, eid):
+    #   APTV[VID][eid][start_sec] = 0, APTV[VID][eid][start_sec + clip_length] = 1.0
+    # This makes get_dAPTV produce dAPTV[eid][VID][start_sec] = 1.0
     vdb.APTV = {}
     vdb.IndividualProfiles = {}
-    for clip_name, info in all_clips.items():
-        vdb.APTV[clip_name] = {}
+    for vid, labels in video_labels.items():
+        duration = vdb.VDB[vid].Duration
+        vdb.APTV[vid] = {}
         for eid in range(1, 9):
-            vdb.APTV[clip_name][eid] = Counter()
-            for t in range(clip_length + 1):
-                vdb.APTV[clip_name][eid][t] = 0
+            vdb.APTV[vid][eid] = Counter()
+            for t in range(duration + 1):
+                vdb.APTV[vid][eid][t] = 0
 
-        # Set labeled emotion to have a jump at t=0 -> t=clip_length
-        vdb.APTV[clip_name][info["eid"]][clip_length] = 1.0
+        # Set labeled emotions to have jumps at their time offsets
+        for start_sec, eid in labels:
+            t_end = start_sec + clip_length
+            if t_end <= duration:
+                vdb.APTV[vid][eid][t_end] = 1.0
 
-        # Minimal individual profiles entry (not used in inference)
-        vdb.IndividualProfiles[clip_name] = []
+        # Minimal individual profiles (not used in inference)
+        vdb.IndividualProfiles[vid] = []
 
     vdb.add_Emotions()
 
@@ -265,11 +287,13 @@ def build_vdb(splits, output_path, clip_length=5):
 
     # Print label distribution
     label_counts = Counter()
-    for info in all_clips.values():
-        label_counts[info["label"]] += 1
+    for labels in video_labels.values():
+        for _, eid in labels:
+            label_counts[eid] += 1
     print("Label distribution:")
-    for label in emotion_list:
-        print(f"  {label}: {label_counts.get(label, 0)}")
+    for i, name in enumerate(emotion_list):
+        eid = i + 1
+        print(f"  {name} (eid={eid}): {label_counts.get(eid, 0)}")
 
 
 def extract_weights(input_dir, repo_root):
@@ -487,27 +511,34 @@ def main():
     print(f"Repository root: {repo_root}")
     print()
 
-    # Step 1: Extract video clips from zip
+    # Step 1: Extract video clips from zip (if available)
     videos_dir = os.path.join(data_dir, "videos")
-    extract_clips(input_dir, videos_dir)
-    print()
-
-    # Find all MP4 files
-    mp4_files = find_mp4_files(videos_dir)
-    print(f"Found {len(mp4_files)} MP4 clips")
-    print()
-
-    # Step 2: Extract frames
+    zip_path = os.path.join(input_dir, "5-second_MP4_Clips.zip")
     frames_dir = os.path.join(data_dir, "frames_fps_10")
-    if not args.skip_frames:
-        extract_frames(mp4_files, frames_dir, fps=args.fps, workers=args.workers)
-    print()
-
-    # Step 3: Extract audio
     audios_dir = os.path.join(data_dir, "audios")
-    if not args.skip_audio:
-        extract_audio(mp4_files, audios_dir, workers=args.workers)
-    print()
+
+    if os.path.exists(zip_path):
+        extract_clips(input_dir, videos_dir)
+        print()
+
+        # Find all MP4 files
+        mp4_files = find_mp4_files(videos_dir)
+        print(f"Found {len(mp4_files)} MP4 clips")
+        print()
+
+        # Step 2: Extract frames
+        if not args.skip_frames:
+            extract_frames(mp4_files, frames_dir, fps=args.fps, workers=args.workers)
+        print()
+
+        # Step 3: Extract audio
+        if not args.skip_audio:
+            extract_audio(mp4_files, audios_dir, workers=args.workers)
+        print()
+    else:
+        print(f"NOTE: {zip_path} not found, skipping video/frame/audio extraction.")
+        print("If you already have frames and audio extracted, set --data-dir to point there.")
+        print()
 
     # Step 4: Generate split files from CSVs
     data_adcumen_dir = os.path.join(repo_root, "DataAdcumen")
@@ -517,7 +548,7 @@ def main():
     # Step 5: Build VDB.pickle
     if splits:
         vdb_path = os.path.join(data_adcumen_dir, "VDB.pickle")
-        build_vdb(splits, vdb_path)
+        build_vdb(splits, vdb_path, frames_dir=frames_dir if os.path.isdir(frames_dir) else None)
     print()
 
     # Step 6: Extract weights
