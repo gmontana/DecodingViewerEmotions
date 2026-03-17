@@ -341,6 +341,8 @@ def main():
     else:
         args_in.cuda_ids = "0"
 
+    args["cuda_ids"] = list(map(int, args_in.cuda_ids.split("_")))
+
     run_model(args_in, args, path_checkpoint,
               file_predictV2, mode_train_val=mode_train_val)
 
